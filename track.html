@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Track your food delivery live on BengaluruBites.">
+  <title>Track Order — BengaluruBites</title>
+  
+  <!-- Satoshi Font -->
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@500,700&display=swap" rel="stylesheet">
+  
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+  
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🍛</text></svg>">
+</head>
+<body>
+
+  <!-- ============================================
+       NAVIGATION BAR
+       ============================================ -->
+  <nav class="nav" id="main-nav">
+    <a href="index.html" class="nav__logo">
+      <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="14" cy="14" r="13" stroke="#000" stroke-width="1.5" fill="#a3e635"/>
+        <path d="M9 18c0-3 2.5-5 5-5s5 2 5 5" stroke="#000" stroke-width="1.5" stroke-linecap="round"/>
+        <circle cx="11" cy="11" r="1.2" fill="#000"/>
+        <circle cx="17" cy="11" r="1.2" fill="#000"/>
+      </svg>
+      BengaluruBites
+    </a>
+    <div class="nav__cta">
+      <a href="index.html" class="btn-ghost btn-sm">Home</a>
+    </div>
+  </nav>
+
+  <!-- ============================================
+       TRACKING INTERFACE
+       ============================================ -->
+  <main class="container section-gap" style="margin-top: 80px; max-width: 1000px;">
+    
+    <!-- Top Details -->
+    <div class="track-header animate-in">
+      <div>
+        <span class="badge badge--lime" id="track-status-banner">Preparing your food...</span>
+        <h1 class="text-heading-lg" style="margin-top: var(--spacing-8);">Tracking Your Order</h1>
+        <p class="text-body-sm" style="color:var(--color-steel);">Order ID: #BB-9876543 · From <strong id="track-merchant">MTR — Mavalli Tiffin Rooms</strong></p>
+      </div>
+      <div class="track-eta">
+        <div class="track-eta__label">ESTIMATED ARRIVAL</div>
+        <div class="track-eta__time">15 mins</div>
+      </div>
+    </div>
+
+    <!-- Map & Details Grid -->
+    <div class="track-grid" style="margin-top: var(--spacing-24);">
+      
+      <!-- Map Column -->
+      <div class="track-left animate-in">
+        <div class="checkout-card" style="padding: 0; overflow: hidden; position: relative;">
+          <!-- Header for Map Card -->
+          <div class="map-header">
+            <span>Rider Route Map</span>
+            <span class="map-header__status">Rider Moving Live</span>
+          </div>
+
+          <!-- Custom SVG / CSS Map Layout -->
+          <div class="track-map">
+            
+            <!-- Map Road Grids (Vector) -->
+            <svg class="track-map__grid" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <pattern id="gridPattern" width="60" height="60" patternUnits="userSpaceOnUse">
+                  <path d="M 60 0 L 0 0 0 60" fill="none" stroke="#ddd" stroke-width="1.5"/>
+                </pattern>
+              </defs>
+              <rect width="100%" height="100%" fill="url(#gridPattern)" />
+              
+              <!-- Custom Mock Roads -->
+              <path d="M 50 150 L 550 150" stroke="#b0b0b0" stroke-width="24" stroke-linecap="round"/>
+              <path d="M 100 50 L 100 250" stroke="#b0b0b0" stroke-width="20" stroke-linecap="round"/>
+              <path d="M 300 50 L 300 250" stroke="#b0b0b0" stroke-width="20" stroke-linecap="round"/>
+              <path d="M 500 50 L 500 250" stroke="#b0b0b0" stroke-width="20" stroke-linecap="round"/>
+              
+              <!-- Delivery Route Base Line -->
+              <path d="M 80 150 L 480 150" stroke="#777" stroke-width="6" stroke-dasharray="8 6" stroke-linecap="round"/>
+            </svg>
+
+            <!-- Active Traversed Path line -->
+            <div id="track-map-progress-line" class="track-map__progress-line"></div>
+
+            <!-- Merchant Node Marker -->
+            <div class="map-node map-node--merchant" style="left: 80px; top: 150px;">
+              <div class="map-node__pin">🏢</div>
+              <div class="map-node__label">RESTAURANT</div>
+            </div>
+
+            <!-- Home Node Marker -->
+            <div class="map-node map-node--home" style="left: 480px; top: 150px;">
+              <div class="map-node__pin">🏠</div>
+              <div class="map-node__label">YOUR HOME</div>
+            </div>
+
+            <!-- Moving Delivery Rider Icon -->
+            <div id="driver-svg-courier" class="map-driver" style="left: 80px; top: 150px;">
+              <div class="map-driver__circle">🛵</div>
+              <div class="map-driver__pulse"></div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Steps Timeline Column -->
+      <div class="track-right animate-in">
+        
+        <!-- Timeline steps card -->
+        <div class="checkout-card" id="track-timeline">
+          <!-- Filled dynamically via javascript -->
+        </div>
+
+        <!-- Rider Profile Card -->
+        <div class="checkout-card" style="margin-top: var(--spacing-24);">
+          <h3 class="text-heading-sm" style="margin-bottom: var(--spacing-16);">Delivery Partner</h3>
+          <div class="rider-profile">
+            <div class="rider-profile__avatar">R</div>
+            <div class="rider-profile__info">
+              <h4 class="rider-profile__name">Ramesh K.</h4>
+              <p class="rider-profile__rating">⭐ 4.9 · 1,200+ deliveries</p>
+              <p class="rider-profile__vehicle">KA-05-EX-4321 (TVS Apache - Grey)</p>
+            </div>
+          </div>
+          <div class="rider-actions">
+            <button class="btn-ghost btn-sm" style="flex:1; justify-content:center;" onclick="showToast('💬 Ramesh: I am on my way!')">Chat with Ramesh</button>
+            <button class="btn-ghost btn-sm" style="flex:1; justify-content:center;" onclick="showToast('📞 Connecting you securely...')">Call Support</button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- ============================================
+       CONFETTI EFFECT OVERLAY
+       ============================================ -->
+  <div id="confetti-wrapper" class="confetti-wrapper"></div>
+
+  <!-- JavaScript -->
+  <script src="script.js"></script>
+</body>
+</html>
