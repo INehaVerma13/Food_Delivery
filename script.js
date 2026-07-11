@@ -200,6 +200,14 @@ const cart = {
     this.render();
     showToast(`🍛 Added ${dish.name} to cart!`);
     updateCartBadge();
+
+    // Trigger cart badge pop animation
+    const badge = document.getElementById('cart-badge');
+    if (badge) {
+      badge.classList.remove('badge-pop');
+      void badge.offsetWidth; // force reflow
+      badge.classList.add('badge-pop');
+    }
   },
 
   remove(id) {
@@ -711,6 +719,23 @@ function initCheckoutPage() {
     });
   }
 
+  // Autofill Address Details for Demo
+  window.autofillDemoAddress = function() {
+    const nameInput = document.getElementById('address-name');
+    const phoneInput = document.getElementById('address-phone');
+    const areaInput = document.getElementById('address-area');
+    const pinInput = document.getElementById('address-pin');
+    const cityInput = document.getElementById('address-city');
+
+    if (nameInput) nameInput.value = "Neha Verma";
+    if (phoneInput) phoneInput.value = "9876543210";
+    if (areaInput) areaInput.value = "456, Midtown Heights, Sector 4, Park Road";
+    if (pinInput) pinInput.value = "560001";
+    if (cityInput) cityInput.value = "My City";
+
+    showToast("📝 Autofilled demo delivery details!");
+  };
+
   // Handle Checkout Form Submission
   const checkoutForm = document.getElementById('checkout-main-form');
   if (checkoutForm) {
@@ -731,14 +756,19 @@ function initCheckoutPage() {
       const merchant = cart.items[0]?.restaurant || "Local Kitchens";
       localStorage.setItem("bb_last_order_merchant", merchant);
 
+      // Show secure BitesPay processing overlay
+      const overlay = document.getElementById('processing-overlay');
+      if (overlay) {
+        overlay.style.display = 'flex';
+      }
+
       // Reset cart
       cart.clear();
 
-      // Redirect to tracker page
-      showToast("🚀 Order placed! Loading live tracking...");
+      // Redirect to tracker page after 2 seconds
       setTimeout(() => {
         window.location.href = "track.html";
-      }, 1000);
+      }, 2000);
     });
   }
 }

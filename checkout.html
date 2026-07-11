@@ -54,7 +54,10 @@
         
         <!-- Address card -->
         <div class="checkout-card animate-in">
-          <h2 class="text-heading-sm checkout-card__title">📍 Delivery Address</h2>
+          <h2 class="text-heading-sm checkout-card__title" style="display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap; gap: 8px;">
+            <span>📍 Delivery Address</span>
+            <button type="button" class="btn-ghost btn-sm" onclick="autofillDemoAddress()" style="font-size: 11px; padding: 4px 10px; box-shadow: 1px 1px 0 #000; border-radius: var(--radius-badges);">Autofill Demo</button>
+          </h2>
           <div class="form-grid">
             <div class="form-group">
               <label for="address-name" class="form-label">Full Name</label>
@@ -212,6 +215,17 @@
   <div class="toast" id="toast">
     <span class="toast__icon">✓</span>
     <span class="toast__text"></span>
+  </div>
+
+  <!-- ============================================
+       PROCESSING OVERLAY
+       ============================================ -->
+  <div id="processing-overlay" class="processing-overlay" style="display: none;">
+    <div class="processing-box">
+      <div class="processing-spinner"></div>
+      <h3 class="text-heading-sm" style="margin-top: var(--spacing-16);">Verifying Payment & Order...</h3>
+      <p class="text-body-sm" style="color: var(--color-steel); margin-top: var(--spacing-8);">Connecting to BitesPay secure gateway</p>
+    </div>
   </div>
 
   <!-- JavaScript -->
