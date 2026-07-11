@@ -3,830 +3,473 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="BiteSwift — Order from the city's most legendary local kitchens. From delicious Rava Idli to hot spicy Biryani, delivered to your door.">
-  <title>BiteSwift — Your Favorite Food, Delivered Fast</title>
-
-  <!-- Satoshi Font -->
-  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@500,700&display=swap" rel="stylesheet">
-
+  <meta name="description" content="CraveLabs — Futuristic, engineered cravings delivered right to your doorstep. Enforce secure auth and check live paths.">
+  <title>CraveLabs — Engineered Cravings, Delivered Fast</title>
+  
   <!-- Stylesheet -->
   <link rel="stylesheet" href="styles.css">
-
-  <!-- Favicon (plate emoji fallback) -->
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🍛</text></svg>">
+  
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🧪</text></svg>">
+  
+  <!-- Clerk SDK via CDN -->
+  <script async crossorigin="anonymous" src="https://cdn.clerk.com/public/clerk.js" data-clerk-publishable-key="pk_test_bW9kZXJuLWhlcm9uLTgyLmNsZXJrLmFjY291bnRzLmRldiQ"></script>
 </head>
 <body>
 
   <!-- ============================================
-       NAVIGATION BAR
+       NAVIGATION BAR (GLASSMORPHIC)
        ============================================ -->
   <nav class="nav" id="main-nav">
     <a href="#" class="nav__logo">
-      <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="14" cy="14" r="13" stroke="#000" stroke-width="1.5" fill="#a3e635"/>
-        <path d="M9 18c0-3 2.5-5 5-5s5 2 5 5" stroke="#000" stroke-width="1.5" stroke-linecap="round"/>
-        <circle cx="11" cy="11" r="1.2" fill="#000"/>
-        <circle cx="17" cy="11" r="1.2" fill="#000"/>
-        <path d="M7 8c1-2 3-3 5-3" stroke="#000" stroke-width="1.2" stroke-linecap="round"/>
-        <path d="M21 8c-1-2-3-3-5-3" stroke="#000" stroke-width="1.2" stroke-linecap="round"/>
+      <svg class="nav__logo-svg" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="32" height="32" rx="16" fill="var(--color-lime)" fill-opacity="0.1"/>
+        <circle cx="16" cy="16" r="10" stroke="var(--color-lime)" stroke-width="2.5" stroke-dasharray="4 2"/>
+        <path d="M12 16 H20" stroke="var(--color-lime)" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M16 12 L16 20" stroke="var(--color-lime)" stroke-width="2.5" stroke-linecap="round"/>
       </svg>
-      BiteSwift
+      CraveLabs
     </a>
 
     <div class="nav__links">
-      <a href="#restaurants" class="nav__link nav__link--active">Restaurants</a>
-      <a href="#dishes" class="nav__link">Dishes</a>
-      <a href="#how-it-works" class="nav__link">How It Works</a>
-      <a href="#testimonials" class="nav__link">Reviews</a>
+      <a href="#explore-menu" class="nav__link nav__link--active">Explore</a>
+      <a href="#restaurants" class="nav__link">Restaurants</a>
+      <a href="#how-it-works" class="nav__link">Process</a>
     </div>
 
     <div class="nav__cta">
-      <button class="btn-ghost btn-sm" onclick="openCart()" id="nav-cart-btn">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-        Cart
-        <span class="cart-badge" id="cart-badge" style="display:none;">0</span>
-      </button>
-      <button class="btn-lime btn-sm" onclick="document.getElementById('cta-section').scrollIntoView({behavior:'smooth'})">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-        Order Now
-      </button>
+      <!-- Cart Trigger -->
+      <div class="cart-btn-wrapper">
+        <button class="btn-ghost btn-sm" onclick="openCart()" id="nav-cart-btn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+          Cart
+          <span class="cart-badge" id="cart-badge" style="display:none;">0</span>
+        </button>
+      </div>
+      <!-- Clerk Authentication Widget Container -->
+      <div id="clerk-user-button"></div>
     </div>
-
-    <button class="nav__mobile-toggle" onclick="toggleMobileNav()" aria-label="Toggle menu">
-      <span></span><span></span><span></span>
-    </button>
   </nav>
 
   <!-- ============================================
-       HERO SECTION
+       HERO SECTION (AWWWARDS RADIAL STYLE)
        ============================================ -->
-  <section class="hero" id="hero">
-    <!-- Floating illustrations -->
-    <div class="hero__illustration hero__illustration--cloud-1">
-      <svg width="100" height="50" viewBox="0 0 100 50" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M20 40c-8 0-15-5-15-12s5-10 10-10c1-8 8-13 16-13 6 0 12 3 14 9 2-1 4-2 7-2 7 0 13 5 13 11 0 1 0 2-0.5 3 5 1 8 5 8 10 0 6-5 10-11 10 0 0.5 0 0.5 0 0z" stroke="#000" stroke-width="1.5" fill="none"/>
-      </svg>
-    </div>
-    <div class="hero__illustration hero__illustration--cloud-2">
-      <svg width="80" height="40" viewBox="0 0 80 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M15 32c-6 0-11-4-11-9s4-8 8-8c1-6 6-10 13-10 5 0 9 3 11 7 2-1 3-1 5-1 6 0 10 4 10 9s-4 9-10 9c0 0.5 0 1 0 1z" stroke="#000" stroke-width="1.5" fill="none"/>
-      </svg>
-    </div>
-    <div class="hero__illustration hero__illustration--fork">
-      <svg width="40" height="80" viewBox="0 0 40 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <line x1="20" y1="30" x2="20" y2="75" stroke="#000" stroke-width="2" stroke-linecap="round"/>
-        <line x1="12" y1="5" x2="12" y2="30" stroke="#000" stroke-width="1.5" stroke-linecap="round"/>
-        <line x1="20" y1="5" x2="20" y2="30" stroke="#000" stroke-width="1.5" stroke-linecap="round"/>
-        <line x1="28" y1="5" x2="28" y2="30" stroke="#000" stroke-width="1.5" stroke-linecap="round"/>
-        <path d="M10 30 Q20 36 30 30" stroke="#000" stroke-width="1.5" fill="none"/>
-      </svg>
-    </div>
-    <div class="hero__illustration hero__illustration--spoon">
-      <svg width="36" height="80" viewBox="0 0 36 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <ellipse cx="18" cy="14" rx="12" ry="14" stroke="#000" stroke-width="1.5" fill="none"/>
-        <line x1="18" y1="28" x2="18" y2="75" stroke="#000" stroke-width="2" stroke-linecap="round"/>
-      </svg>
-    </div>
-
-    <div class="hero__content">
+  <header class="hero">
+    <div class="hero__grid-bg"></div>
+    <div class="container hero__content">
       <div class="hero__eyebrow">
-        <span class="badge">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26z"/></svg>
-          Your Favorite Food App
+        <span class="badge badge--lime">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26z"/></svg>
+          AUTHENTICATED VIA CLERK MOCK/LIVE GOOGLE LOGIN
         </span>
       </div>
 
-      <h1 class="hero__title">Legendary Local Flavours, At Your Door</h1>
-      <p class="hero__subtitle">From MTR's iconic Rava Idli to Meghana's fiery Biryani — order from 200+ beloved local restaurants.</p>
+      <h1 class="hero__title">Engineered Cravings,<br><span class="gradient-text">Delivered Fast.</span></h1>
+      
+      <p class="hero__subtitle">Order from heritage tiffin rooms, local craft brewpubs, or late-night kebab kitchens. Handled securely, tracked in real-time.</p>
 
       <div class="hero__search">
-        <input type="text" class="input-field" id="hero-search" placeholder="Search restaurants, dishes, or cuisines..." aria-label="Search restaurants">
+        <input type="text" id="hero-search" placeholder="Type what you want to eat (dosa, pizza, biryani...)" aria-label="Search items">
         <button class="btn-lime" onclick="document.getElementById('restaurants').scrollIntoView({behavior:'smooth'})">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          Search
+          Explore
         </button>
       </div>
 
       <div class="hero__stats">
-        <div class="hero__stat">
-          <div class="hero__stat-number">200+</div>
-          <div class="hero__stat-label">Restaurants</div>
+        <div>
+          <div class="hero__stat-num">9</div>
+          <div class="hero__stat-label">Iconic Kitchens</div>
         </div>
-        <div class="hero__stat">
-          <div class="hero__stat-number">45 min</div>
-          <div class="hero__stat-label">Avg. Delivery</div>
+        <div>
+          <div class="hero__stat-num">30 Min</div>
+          <div class="hero__stat-label">Average Speed</div>
         </div>
-        <div class="hero__stat">
-          <div class="hero__stat-number">4.8★</div>
-          <div class="hero__stat-label">App Rating</div>
-        </div>
-        <div class="hero__stat">
-          <div class="hero__stat-number">₹0</div>
-          <div class="hero__stat-label">Delivery Fee</div>
+        <div>
+          <div class="hero__stat-num">0 fee</div>
+          <div class="hero__stat-label">Above ₹500</div>
         </div>
       </div>
     </div>
-
-    <!-- Wavy divider to white -->
-    <div class="wavy-divider wavy-divider--white">
-      <svg viewBox="0 0 1440 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M0,40 C150,80 350,0 600,40 C850,80 1050,0 1200,40 C1350,80 1440,20 1440,40 L1440,100 L0,100 Z" fill="#ffffff"/>
-      </svg>
-    </div>
-  </section>
+  </header>
 
   <!-- ============================================
-       CUISINE CATEGORIES
+       BENTO CARD CATEGORIES SECTION
        ============================================ -->
-  <section class="categories" id="categories">
-    <div class="container">
-      <div class="section-header">
-        <span class="badge">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-          Explore Cuisines
-        </span>
-        <h2 class="section-header__title">What Are You Craving?</h2>
-        <p class="section-header__subtitle">Pick a cuisine — we'll show you the best near you.</p>
-      </div>
+  <section class="container" id="explore-menu" style="padding-top: 40px; padding-bottom: 80px;">
+    <div class="bento-header">
+      <span class="badge">Bento Grid Selection</span>
+      <h2 class="section-title" style="margin-top: 10px;">Select Your Taste Profile</h2>
+    </div>
 
-      <div class="category-grid">
-        <div class="category-card category-card--buttercream animate-in" data-category="south-indian" onclick="filterByCategory('south-indian')">
-          <div class="category-card__icon">🥘</div>
-          <div class="category-card__title">South Indian</div>
-          <div class="category-card__count">45+ restaurants</div>
+    <div class="bento-grid">
+      <!-- South Indian -->
+      <div class="bento-card bento-card--large" onclick="filterByCuisine('south-indian')">
+        <div>
+          <h3 class="bento-card__title">Heritage South Indian</h3>
+          <p class="bento-card__desc">Fluffy Rava Idlis, golden butter-drenched masala dosas, and filter coffee.</p>
         </div>
-        <div class="category-card category-card--mint animate-in" data-category="biryani" onclick="filterByCategory('biryani')">
-          <div class="category-card__icon">🍚</div>
-          <div class="category-card__title">Biryani</div>
-          <div class="category-card__count">30+ restaurants</div>
+        <div class="bento-card__icon">🥘</div>
+      </div>
+      <!-- Biryani -->
+      <div class="bento-card bento-card--large" onclick="filterByCuisine('biryani')">
+        <div>
+          <h3 class="bento-card__title">Fiery Andhra Biryani</h3>
+          <p class="bento-card__desc">Aromatic basmati rice layered with highly-spiced kebabs and rich curries.</p>
         </div>
-        <div class="category-card category-card--lilac animate-in" data-category="cafe" onclick="filterByCategory('cafe')">
-          <div class="category-card__icon">☕</div>
-          <div class="category-card__title">Cafés & Brewpubs</div>
-          <div class="category-card__count">25+ restaurants</div>
+        <div class="bento-card__icon">🍚</div>
+      </div>
+      <!-- Brewpubs & Pizzas -->
+      <div class="bento-card bento-card--wide" onclick="filterByCuisine('cafe')">
+        <div>
+          <h3 class="bento-card__title">Craft Brews & Pizza</h3>
+          <p class="bento-card__desc">Gourmet wood-fired pepperoni slices and craft mocktails.</p>
         </div>
-        <div class="category-card category-card--bubblegum animate-in" data-category="burgers" onclick="filterByCategory('burgers')">
-          <div class="category-card__icon">🍔</div>
-          <div class="category-card__title">Burgers & Fries</div>
-          <div class="category-card__count">20+ restaurants</div>
+        <div class="bento-card__icon">🍕</div>
+      </div>
+      <!-- Burgers -->
+      <div class="bento-card" onclick="filterByCuisine('burgers')">
+        <div>
+          <h3 class="bento-card__title">American Burgers</h3>
+          <p class="bento-card__desc">Grilled patties with double cheese.</p>
         </div>
-        <div class="category-card category-card--sky animate-in" data-category="north-indian" onclick="filterByCategory('north-indian')">
-          <div class="category-card__icon">🍗</div>
-          <div class="category-card__title">North Indian</div>
-          <div class="category-card__count">35+ restaurants</div>
+        <div class="bento-card__icon">🍔</div>
+      </div>
+      <!-- North Indian -->
+      <div class="bento-card" onclick="filterByCuisine('north-indian')">
+        <div>
+          <h3 class="bento-card__title">North Indian</h3>
+          <p class="bento-card__desc">Butter chicken and hot tandoori rotis.</p>
         </div>
-        <div class="category-card category-card--lime animate-in" data-category="all" onclick="filterByCategory('all')">
-          <div class="category-card__icon">✨</div>
-          <div class="category-card__title">All Cuisines</div>
-          <div class="category-card__count">200+ restaurants</div>
-        </div>
+        <div class="bento-card__icon">🍗</div>
       </div>
     </div>
   </section>
 
   <!-- ============================================
-       FEATURED RESTAURANTS
+       RESTAURANT DIRECTORY & LISTINGS (SWIGGY FLOW)
        ============================================ -->
-  <section class="restaurants" id="restaurants">
-    <div class="container">
-      <div class="section-header">
-        <span class="badge">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18v18H3z"/><path d="M12 8v8"/><path d="M8 12h8"/></svg>
-          Featured Restaurants
-        </span>
-        <h2 class="section-header__title">Legendary Local Kitchens</h2>
-        <p class="section-header__subtitle">Iconic restaurants loved by millions — now at your fingertips.</p>
+  <section class="container section-gap" id="restaurants" style="border-top: 1px solid var(--color-border);">
+    <div class="restaurant-filters">
+      <div>
+        <h2 class="section-title">Directory Listings</h2>
+        <p class="section-desc" style="margin-bottom:0;">Order from legendary kitchens. Filters reflect instantly.</p>
       </div>
 
-      <div class="restaurant-grid">
-
-        <!-- MTR -->
-        <div class="restaurant-card animate-in" data-category="south-indian">
-          <img class="restaurant-card__image" src="https://images.unsplash.com/photo-1630383249896-424e482df921?w=600&h=400&fit=crop" alt="MTR Mavalli Tiffin Rooms — South Indian breakfast spread" loading="lazy">
-          <div class="restaurant-card__body">
-            <div class="restaurant-card__tags">
-              <span class="restaurant-card__tag restaurant-card__tag--veg">Pure Veg</span>
-              <span class="restaurant-card__tag restaurant-card__tag--popular">Iconic</span>
-            </div>
-            <h3 class="restaurant-card__name">MTR — Mavalli Tiffin Rooms</h3>
-            <div class="restaurant-card__meta">
-              <span class="restaurant-card__rating">★ 4.6</span>
-              <span class="restaurant-card__detail">25–35 min</span>
-              <span class="restaurant-card__detail">Lalbagh</span>
-            </div>
-            <p class="restaurant-card__cuisine">South Indian · Rava Idli · Masala Dosa · Filter Coffee</p>
-            <div class="restaurant-card__footer">
-              <span class="restaurant-card__price">₹200 for two</span>
-              <button class="restaurant-card__order-btn" onclick="window.location.href='restaurant.html?id=mtr'">View Menu</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Vidyarthi Bhavan -->
-        <div class="restaurant-card animate-in" data-category="south-indian">
-          <img class="restaurant-card__image" src="https://images.unsplash.com/photo-1668236543090-82eba5ee5976?w=600&h=400&fit=crop" alt="Vidyarthi Bhavan Masala Dosa" loading="lazy">
-          <div class="restaurant-card__body">
-            <div class="restaurant-card__tags">
-              <span class="restaurant-card__tag restaurant-card__tag--veg">Pure Veg</span>
-              <span class="restaurant-card__tag">Heritage</span>
-            </div>
-            <h3 class="restaurant-card__name">Vidyarthi Bhavan</h3>
-            <div class="restaurant-card__meta">
-              <span class="restaurant-card__rating">★ 4.5</span>
-              <span class="restaurant-card__detail">30–40 min</span>
-              <span class="restaurant-card__detail">Basavanagudi</span>
-            </div>
-            <p class="restaurant-card__cuisine">South Indian · Benne Masala Dosa · Kesari Bath</p>
-            <div class="restaurant-card__footer">
-              <span class="restaurant-card__price">₹200 for two</span>
-              <button class="restaurant-card__order-btn" onclick="window.location.href='restaurant.html?id=vidyarthi-bhavan'">View Menu</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Meghana Foods -->
-        <div class="restaurant-card animate-in" data-category="biryani">
-          <img class="restaurant-card__image" src="https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=600&h=400&fit=crop" alt="Meghana Foods Biryani" loading="lazy">
-          <div class="restaurant-card__body">
-            <div class="restaurant-card__tags">
-              <span class="restaurant-card__tag restaurant-card__tag--popular">Most Ordered</span>
-              <span class="restaurant-card__tag">Andhra</span>
-            </div>
-            <h3 class="restaurant-card__name">Meghana Foods</h3>
-            <div class="restaurant-card__meta">
-              <span class="restaurant-card__rating">★ 4.4</span>
-              <span class="restaurant-card__detail">30–45 min</span>
-              <span class="restaurant-card__detail">Koramangala</span>
-            </div>
-            <p class="restaurant-card__cuisine">Biryani · Andhra · Chicken 65 · Boneless Biryani</p>
-            <div class="restaurant-card__footer">
-              <span class="restaurant-card__price">₹400 for two</span>
-              <button class="restaurant-card__order-btn" onclick="window.location.href='restaurant.html?id=meghana-foods'">View Menu</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Truffles -->
-        <div class="restaurant-card animate-in" data-category="burgers">
-          <img class="restaurant-card__image" src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&h=400&fit=crop" alt="Truffles Burger" loading="lazy">
-          <div class="restaurant-card__body">
-            <div class="restaurant-card__tags">
-              <span class="restaurant-card__tag restaurant-card__tag--popular">Student Fav</span>
-              <span class="restaurant-card__tag">Café</span>
-            </div>
-            <h3 class="restaurant-card__name">Truffles</h3>
-            <div class="restaurant-card__meta">
-              <span class="restaurant-card__rating">★ 4.5</span>
-              <span class="restaurant-card__detail">25–40 min</span>
-              <span class="restaurant-card__detail">Koramangala</span>
-            </div>
-            <p class="restaurant-card__cuisine">Burgers · American · Steaks · Desserts</p>
-            <div class="restaurant-card__footer">
-              <span class="restaurant-card__price">₹550 for two</span>
-              <button class="restaurant-card__order-btn" onclick="window.location.href='restaurant.html?id=truffles'">View Menu</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Empire Restaurant -->
-        <div class="restaurant-card animate-in" data-category="north-indian">
-          <img class="restaurant-card__image" src="https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=600&h=400&fit=crop" alt="Empire Restaurant Kebabs and Biryani" loading="lazy">
-          <div class="restaurant-card__body">
-            <div class="restaurant-card__tags">
-              <span class="restaurant-card__tag">Late Night</span>
-              <span class="restaurant-card__tag restaurant-card__tag--popular">Legendary</span>
-            </div>
-            <h3 class="restaurant-card__name">Empire Restaurant</h3>
-            <div class="restaurant-card__meta">
-              <span class="restaurant-card__rating">★ 4.3</span>
-              <span class="restaurant-card__detail">20–35 min</span>
-              <span class="restaurant-card__detail">Church Street</span>
-            </div>
-            <p class="restaurant-card__cuisine">North Indian · Mughlai · Kebabs · Biryani</p>
-            <div class="restaurant-card__footer">
-              <span class="restaurant-card__price">₹350 for two</span>
-              <button class="restaurant-card__order-btn" onclick="window.location.href='restaurant.html?id=empire-restaurant'">View Menu</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Toit -->
-        <div class="restaurant-card animate-in" data-category="cafe">
-          <img class="restaurant-card__image" src="https://images.unsplash.com/photo-1513104890138-7c749659a591?w=600&h=400&fit=crop" alt="Toit Brewpub Pizza and Craft Beer" loading="lazy">
-          <div class="restaurant-card__body">
-            <div class="restaurant-card__tags">
-              <span class="restaurant-card__tag">Brewpub</span>
-              <span class="restaurant-card__tag restaurant-card__tag--popular">Craft Beer</span>
-            </div>
-            <h3 class="restaurant-card__name">Toit Brewpub</h3>
-            <div class="restaurant-card__meta">
-              <span class="restaurant-card__rating">★ 4.4</span>
-              <span class="restaurant-card__detail">35–50 min</span>
-              <span class="restaurant-card__detail">Indiranagar</span>
-            </div>
-            <p class="restaurant-card__cuisine">Wood-fired Pizza · Craft Beer · Gourmet Burgers</p>
-            <div class="restaurant-card__footer">
-              <span class="restaurant-card__price">₹1200 for two</span>
-              <button class="restaurant-card__order-btn" onclick="window.location.href='restaurant.html?id=toit'">View Menu</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- CTR -->
-        <div class="restaurant-card animate-in" data-category="south-indian">
-          <img class="restaurant-card__image" src="https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=600&h=400&fit=crop" alt="CTR Benne Masala Dosa" loading="lazy">
-          <div class="restaurant-card__body">
-            <div class="restaurant-card__tags">
-              <span class="restaurant-card__tag restaurant-card__tag--veg">Pure Veg</span>
-              <span class="restaurant-card__tag">Since 1920</span>
-            </div>
-            <h3 class="restaurant-card__name">CTR — Shri Sagar</h3>
-            <div class="restaurant-card__meta">
-              <span class="restaurant-card__rating">★ 4.5</span>
-              <span class="restaurant-card__detail">30–45 min</span>
-              <span class="restaurant-card__detail">Malleshwaram</span>
-            </div>
-            <p class="restaurant-card__cuisine">South Indian · Benne Dosa · Filter Coffee · Vada</p>
-            <div class="restaurant-card__footer">
-              <span class="restaurant-card__price">₹200 for two</span>
-              <button class="restaurant-card__order-btn" onclick="window.location.href='restaurant.html?id=ctr'">View Menu</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Karavalli -->
-        <div class="restaurant-card animate-in" data-category="south-indian">
-          <img class="restaurant-card__image" src="https://images.unsplash.com/photo-1631515243349-e0cb75fb8d3a?w=600&h=400&fit=crop" alt="Karavalli Coastal Cuisine" loading="lazy">
-          <div class="restaurant-card__body">
-            <div class="restaurant-card__tags">
-              <span class="restaurant-card__tag">Fine Dining</span>
-              <span class="restaurant-card__tag">Coastal</span>
-            </div>
-            <h3 class="restaurant-card__name">Karavalli</h3>
-            <div class="restaurant-card__meta">
-              <span class="restaurant-card__rating">★ 4.7</span>
-              <span class="restaurant-card__detail">40–55 min</span>
-              <span class="restaurant-card__detail">Residency Road</span>
-            </div>
-            <p class="restaurant-card__cuisine">Coastal · Kori Rotti · Neer Dosa · Prawn Gassi</p>
-            <div class="restaurant-card__footer">
-              <span class="restaurant-card__price">₹1500 for two</span>
-              <button class="restaurant-card__order-btn" onclick="window.location.href='restaurant.html?id=karavalli'">View Menu</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Koshy's -->
-        <div class="restaurant-card animate-in" data-category="north-indian">
-          <img class="restaurant-card__image" src="https://images.unsplash.com/photo-1544025162-d76694265947?w=600&h=400&fit=crop" alt="Koshy's Heritage" loading="lazy">
-          <div class="restaurant-card__body">
-            <div class="restaurant-card__tags">
-              <span class="restaurant-card__tag">Heritage</span>
-              <span class="restaurant-card__tag">Since 1940</span>
-            </div>
-            <h3 class="restaurant-card__name">Koshy's</h3>
-            <div class="restaurant-card__meta">
-              <span class="restaurant-card__rating">★ 4.2</span>
-              <span class="restaurant-card__detail">30–45 min</span>
-              <span class="restaurant-card__detail">St. Mark's Road</span>
-            </div>
-            <p class="restaurant-card__cuisine">Multi-Cuisine · Mutton Stew · Devilled Chicken</p>
-            <div class="restaurant-card__footer">
-              <span class="restaurant-card__price">₹450 for two</span>
-              <button class="restaurant-card__order-btn" onclick="window.location.href='restaurant.html?id=koshys'">View Menu</button>
-            </div>
-          </div>
-        </div>
-
+      <div class="filters-group">
+        <button class="filter-btn filter-btn--active" onclick="filterByCuisine('all', this)">All</button>
+        <button class="filter-btn" onclick="filterByCuisine('south-indian', this)">South Indian</button>
+        <button class="filter-btn" onclick="filterByCuisine('biryani', this)">Biryani</button>
+        <button class="filter-btn" onclick="filterByCuisine('cafe', this)">Cafés / Pizza</button>
+        <button class="filter-btn" onclick="filterByCuisine('burgers', this)">Burgers</button>
+        <button class="filter-btn" onclick="filterByCuisine('north-indian', this)">North Indian</button>
+        <button class="filter-btn" onclick="toggleVegOnlyFilter(this)" style="background: rgba(34,197,94,0.05); color: #22c55e; border-color: rgba(34,197,94,0.2);">🟢 Veg Only</button>
       </div>
+    </div>
+
+    <!-- Restaurants Grid -->
+    <div class="restaurants-grid">
+
+      <!-- MTR -->
+      <div class="restaurant-card" data-category="south-indian" data-veg="true" onclick="window.location.href='restaurant.html?id=mtr'">
+        <div class="restaurant-card__image-wrapper">
+          <img class="restaurant-card__img" src="https://images.unsplash.com/photo-1630383249896-424e482df921?w=600&h=400&fit=crop" alt="MTR Mavalli Tiffin Rooms">
+          <div class="restaurant-card__overlay">
+            <span class="badge badge--lime">Pure Veg</span>
+            <span class="badge">Legendary</span>
+          </div>
+        </div>
+        <div class="restaurant-card__body">
+          <h3 class="restaurant-card__name">MTR — Mavalli Tiffin Rooms</h3>
+          <p class="restaurant-card__cuisine">Rava Idli · Special Dosa · Filter Coffee</p>
+          <div class="restaurant-card__meta">
+            <span class="restaurant-card__rating">★ 4.6</span>
+            <span>25–35 min</span>
+            <span>₹200 for two</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Vidyarthi Bhavan -->
+      <div class="restaurant-card" data-category="south-indian" data-veg="true" onclick="window.location.href='restaurant.html?id=vidyarthi-bhavan'">
+        <div class="restaurant-card__image-wrapper">
+          <img class="restaurant-card__img" src="https://images.unsplash.com/photo-1668236543090-82eba5ee5976?w=600&h=400&fit=crop" alt="Vidyarthi Bhavan Dosa">
+          <div class="restaurant-card__overlay">
+            <span class="badge badge--lime">Pure Veg</span>
+            <span class="badge">Heritage</span>
+          </div>
+        </div>
+        <div class="restaurant-card__body">
+          <h3 class="restaurant-card__name">Vidyarthi Bhavan</h3>
+          <p class="restaurant-card__cuisine">Benne Masala Dosa · Poori Sagu · Kesari Bath</p>
+          <div class="restaurant-card__meta">
+            <span class="restaurant-card__rating">★ 4.5</span>
+            <span>30–40 min</span>
+            <span>₹200 for two</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Meghana Foods -->
+      <div class="restaurant-card" data-category="biryani" data-veg="false" onclick="window.location.href='restaurant.html?id=meghana-foods'">
+        <div class="restaurant-card__image-wrapper">
+          <img class="restaurant-card__img" src="https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=600&h=400&fit=crop" alt="Meghana Foods Biryani">
+          <div class="restaurant-card__overlay">
+            <span class="badge">Andhra Style</span>
+            <span class="badge">Spicy</span>
+          </div>
+        </div>
+        <div class="restaurant-card__body">
+          <h3 class="restaurant-card__name">Meghana Foods</h3>
+          <p class="restaurant-card__cuisine">Andhra Biryani · Chicken 65 · Keema Biryani</p>
+          <div class="restaurant-card__meta">
+            <span class="restaurant-card__rating">★ 4.4</span>
+            <span>30–45 min</span>
+            <span>₹400 for two</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Truffles -->
+      <div class="restaurant-card" data-category="burgers" data-veg="false" onclick="window.location.href='restaurant.html?id=truffles'">
+        <div class="restaurant-card__image-wrapper">
+          <img class="restaurant-card__img" src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&h=400&fit=crop" alt="Truffles Burgers">
+          <div class="restaurant-card__overlay">
+            <span class="badge">Student Fav</span>
+            <span class="badge">Burgers & Café</span>
+          </div>
+        </div>
+        <div class="restaurant-card__body">
+          <h3 class="restaurant-card__name">Truffles</h3>
+          <p class="restaurant-card__cuisine">All American Burger · Cheesy Fries · Cakes</p>
+          <div class="restaurant-card__meta">
+            <span class="restaurant-card__rating">★ 4.5</span>
+            <span>25–40 min</span>
+            <span>₹550 for two</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empire Restaurant -->
+      <div class="restaurant-card" data-category="north-indian" data-veg="false" onclick="window.location.href='restaurant.html?id=empire-restaurant'">
+        <div class="restaurant-card__image-wrapper">
+          <img class="restaurant-card__img" src="https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=600&h=400&fit=crop" alt="Empire Restaurant Kebabs">
+          <div class="restaurant-card__overlay">
+            <span class="badge">Late Night</span>
+            <span class="badge">Mughlai</span>
+          </div>
+        </div>
+        <div class="restaurant-card__body">
+          <h3 class="restaurant-card__name">Empire Restaurant</h3>
+          <p class="restaurant-card__cuisine">Mughlai Chicken Biryani · Ghee Rice · Dal Fry</p>
+          <div class="restaurant-card__meta">
+            <span class="restaurant-card__rating">★ 4.3</span>
+            <span>20–35 min</span>
+            <span>₹350 for two</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Toit -->
+      <div class="restaurant-card" data-category="cafe" data-veg="false" onclick="window.location.href='restaurant.html?id=toit'">
+        <div class="restaurant-card__image-wrapper">
+          <img class="restaurant-card__img" src="https://images.unsplash.com/photo-1513104890138-7c749659a591?w=600&h=400&fit=crop" alt="Toit Pizzas">
+          <div class="restaurant-card__overlay">
+            <span class="badge">Wood-fired</span>
+            <span class="badge">Brewpub Pizzas</span>
+          </div>
+        </div>
+        <div class="restaurant-card__body">
+          <h3 class="restaurant-card__name">Toit Brewpub</h3>
+          <p class="restaurant-card__cuisine">Wood-fired Pepperoni Pizza · Margherita Pizza · Drinks</p>
+          <div class="restaurant-card__meta">
+            <span class="restaurant-card__rating">★ 4.4</span>
+            <span>35–50 min</span>
+            <span>₹1200 for two</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- CTR -->
+      <div class="restaurant-card" data-category="south-indian" data-veg="true" onclick="window.location.href='restaurant.html?id=ctr'">
+        <div class="restaurant-card__image-wrapper">
+          <img class="restaurant-card__img" src="https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=600&h=400&fit=crop" alt="CTR Shri Sagar Dosa">
+          <div class="restaurant-card__overlay">
+            <span class="badge badge--lime">Pure Veg</span>
+            <span class="badge">Crispy Legend</span>
+          </div>
+        </div>
+        <div class="restaurant-card__body">
+          <h3 class="restaurant-card__name">CTR — Shri Sagar</h3>
+          <p class="restaurant-card__cuisine">Benne Masala Dosa · Crispy Medu Vada · Khara Bath</p>
+          <div class="restaurant-card__meta">
+            <span class="restaurant-card__rating">★ 4.5</span>
+            <span>30–45 min</span>
+            <span>₹200 for two</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Karavalli -->
+      <div class="restaurant-card" data-category="south-indian" data-veg="false" onclick="window.location.href='restaurant.html?id=karavalli'">
+        <div class="restaurant-card__image-wrapper">
+          <img class="restaurant-card__img" src="https://images.unsplash.com/photo-1631515243349-e0cb75fb8d3a?w=600&h=400&fit=crop" alt="Karavalli Seafood">
+          <div class="restaurant-card__overlay">
+            <span class="badge">Fine Dining</span>
+            <span class="badge">Mangalorean</span>
+          </div>
+        </div>
+        <div class="restaurant-card__body">
+          <h3 class="restaurant-card__name">Karavalli</h3>
+          <p class="restaurant-card__cuisine">Tiger Prawn Gassi · Wafer Neer Dosa · Fish Fry</p>
+          <div class="restaurant-card__meta">
+            <span class="restaurant-card__rating">★ 4.7</span>
+            <span>40–55 min</span>
+            <span>₹1500 for two</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Koshy's -->
+      <div class="restaurant-card" data-category="north-indian" data-veg="false" onclick="window.location.href='restaurant.html?id=koshys'">
+        <div class="restaurant-card__image-wrapper">
+          <img class="restaurant-card__img" src="https://images.unsplash.com/photo-1544025162-d76694265947?w=600&h=400&fit=crop" alt="Koshy's Continental">
+          <div class="restaurant-card__overlay">
+            <span class="badge">Heritage Hub</span>
+            <span class="badge">Old School</span>
+          </div>
+        </div>
+        <div class="restaurant-card__body">
+          <h3 class="restaurant-card__name">Koshy's</h3>
+          <p class="restaurant-card__cuisine">British Mutton Stew · Devilled Chicken · Custard</p>
+          <div class="restaurant-card__meta">
+            <span class="restaurant-card__rating">★ 4.2</span>
+            <span>30–45 min</span>
+            <span>₹450 for two</span>
+          </div>
+        </div>
+      </div>
+
     </div>
   </section>
 
   <!-- ============================================
-       WAVY DIVIDER — white to meadow
+       PROCESS & STEPS TIMELINE
        ============================================ -->
-  <div class="wavy-divider wavy-divider--meadow">
-    <svg viewBox="0 0 1440 80" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M0,30 C200,60 400,0 720,30 C1040,60 1240,0 1440,30 L1440,80 L0,80 Z" fill="#b9f0c0"/>
-    </svg>
-  </div>
+  <section class="container section-gap" id="how-it-works" style="border-top: 1px solid var(--color-border);">
+    <div class="bento-header" style="text-align:left; margin-bottom: 60px;">
+      <span class="badge">Delivery Blueprint</span>
+      <h2 class="section-title" style="margin-top:10px;">The CraveLabs Protocol</h2>
+      <p style="color:var(--color-text-muted);">How we handle your food order from checkout verification to your dining table.</p>
+    </div>
 
-  <!-- ============================================
-       CUSTOMER LOGO / PARTNER STRIP
-       ============================================ -->
-  <section class="logo-strip">
-    <div class="container">
-      <div class="section-header" style="margin-bottom: 32px;">
-        <span class="badge">🤝 Trusted Partners</span>
+    <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 30px;">
+      <div class="bento-card">
+        <div>
+          <span style="font-size:24px; font-weight:700; color:var(--color-lime);">01</span>
+          <h3 class="bento-card__title" style="margin-top:12px; margin-bottom:8px;">Clerk Session Gate</h3>
+          <p class="bento-card__desc" style="margin-top:0;">Authenticates via Google Login to protect user checkout credentials instantly.</p>
+        </div>
+        <div class="bento-card__icon" style="font-size:40px; right:16px; bottom:16px;">🔐</div>
       </div>
-      <div class="logo-strip__inner">
-        <span class="logo-strip__brand">Swiggy</span>
-        <span class="logo-strip__brand">Zomato</span>
-        <span class="logo-strip__brand">Dunzo</span>
-        <span class="logo-strip__brand">PhonePe</span>
-        <span class="logo-strip__brand">Google Pay</span>
-        <span class="logo-strip__brand">Paytm</span>
+      
+      <div class="bento-card">
+        <div>
+          <span style="font-size:24px; font-weight:700; color:var(--color-lime);">02</span>
+          <h3 class="bento-card__title" style="margin-top:12px; margin-bottom:8px;">Chef Dispatching</h3>
+          <p class="bento-card__desc" style="margin-top:0;">Kitchen receives, packs with hygiene guards, and hands over to our courier partner.</p>
+        </div>
+        <div class="bento-card__icon" style="font-size:40px; right:16px; bottom:16px;">🍳</div>
+      </div>
+
+      <div class="bento-card">
+        <div>
+          <span style="font-size:24px; font-weight:700; color:var(--color-lime);">03</span>
+          <h3 class="bento-card__title" style="margin-top:12px; margin-bottom:8px;">Route Animation</h3>
+          <p class="bento-card__desc" style="margin-top:0;">Rider path moves live on vector grids, celebrating with confetti on arrival.</p>
+        </div>
+        <div class="bento-card__icon" style="font-size:40px; right:16px; bottom:16px;">🛵</div>
       </div>
     </div>
   </section>
-
-  <!-- ============================================
-       WAVY DIVIDER — meadow to white
-       ============================================ -->
-  <div class="wavy-divider wavy-divider--paper" style="background-color: var(--color-meadow);">
-    <svg viewBox="0 0 1440 80" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M0,30 C360,70 720,0 1080,30 C1260,50 1380,10 1440,30 L1440,80 L0,80 Z" fill="#ffffff"/>
-    </svg>
-  </div>
-
-  <!-- ============================================
-       POPULAR DISHES
-       ============================================ -->
-  <section class="popular-dishes" id="dishes">
-    <div class="container">
-      <div class="section-header">
-        <span class="badge">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26z"/></svg>
-          Most Loved Dishes
-        </span>
-        <h2 class="section-header__title">Local Greatest Hits</h2>
-        <p class="section-header__subtitle">The dishes that made these kitchens legendary.</p>
-      </div>
-
-      <div class="dishes-grid">
-        <!-- Rava Idli -->
-        <div class="dish-card animate-in">
-          <img class="dish-card__image" src="https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=400&h=300&fit=crop" alt="Rava Idli" loading="lazy">
-          <div class="dish-card__body">
-            <h3 class="dish-card__name">Rava Idli</h3>
-            <p class="dish-card__restaurant">MTR — Mavalli Tiffin Rooms</p>
-            <div class="dish-card__footer">
-              <span class="dish-card__price">₹90</span>
-              <button class="dish-card__add-btn" onclick="addToCart('mtr-rava-idli','Rava Idli (MTR)',90,'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?w=200&h=200&fit=crop','MTR')">+</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Masala Dosa -->
-        <div class="dish-card animate-in">
-          <img class="dish-card__image" src="https://images.unsplash.com/photo-1668236543090-82eba5ee5976?w=400&h=300&fit=crop" alt="Masala Dosa" loading="lazy">
-          <div class="dish-card__body">
-            <h3 class="dish-card__name">Benne Masala Dosa</h3>
-            <p class="dish-card__restaurant">Vidyarthi Bhavan</p>
-            <div class="dish-card__footer">
-              <span class="dish-card__price">₹90</span>
-              <button class="dish-card__add-btn" onclick="addToCart('vb-dosa','Benne Masala Dosa',90,'https://images.unsplash.com/photo-1668236543090-82eba5ee5976?w=200&h=200&fit=crop','Vidyarthi Bhavan')">+</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Meghana Special Biryani -->
-        <div class="dish-card animate-in">
-          <img class="dish-card__image" src="https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400&h=300&fit=crop" alt="Meghana Special Biryani" loading="lazy">
-          <div class="dish-card__body">
-            <h3 class="dish-card__name">Meghana Special Biryani</h3>
-            <p class="dish-card__restaurant">Meghana Foods</p>
-            <div class="dish-card__footer">
-              <span class="dish-card__price">₹320</span>
-              <button class="dish-card__add-btn" onclick="addToCart('meghana-biryani','Special Biryani',320,'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=200&h=200&fit=crop','Meghana Foods')">+</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- All American Burger -->
-        <div class="dish-card animate-in">
-          <img class="dish-card__image" src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&h=300&fit=crop" alt="All American Burger" loading="lazy">
-          <div class="dish-card__body">
-            <h3 class="dish-card__name">All American Burger</h3>
-            <p class="dish-card__restaurant">Truffles</p>
-            <div class="dish-card__footer">
-              <span class="dish-card__price">₹295</span>
-              <button class="dish-card__add-btn" onclick="addToCart('truffles-burger','All American Burger',295,'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=200&h=200&fit=crop','Truffles')">+</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Chicken Biryani -->
-        <div class="dish-card animate-in">
-          <img class="dish-card__image" src="https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=400&h=300&fit=crop" alt="Empire Chicken Biryani" loading="lazy">
-          <div class="dish-card__body">
-            <h3 class="dish-card__name">Chicken Biryani</h3>
-            <p class="dish-card__restaurant">Empire Restaurant</p>
-            <div class="dish-card__footer">
-              <span class="dish-card__price">₹220</span>
-              <button class="dish-card__add-btn" onclick="addToCart('empire-biryani','Chicken Biryani',220,'https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=200&h=200&fit=crop','Empire Restaurant')">+</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Wood-fired Pizza -->
-        <div class="dish-card animate-in">
-          <img class="dish-card__image" src="https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400&h=300&fit=crop" alt="Wood-fired Pizza" loading="lazy">
-          <div class="dish-card__body">
-            <h3 class="dish-card__name">Wood-fired Pizza</h3>
-            <p class="dish-card__restaurant">Toit Brewpub</p>
-            <div class="dish-card__footer">
-              <span class="dish-card__price">₹450</span>
-              <button class="dish-card__add-btn" onclick="addToCart('toit-pizza','Wood-fired Pizza',450,'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=200&h=200&fit=crop','Toit')">+</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Filter Coffee -->
-        <div class="dish-card animate-in">
-          <img class="dish-card__image" src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=400&h=300&fit=crop" alt="Filter Coffee" loading="lazy">
-          <div class="dish-card__body">
-            <h3 class="dish-card__name">Filter Coffee</h3>
-            <p class="dish-card__restaurant">Brahmin's Coffee Bar</p>
-            <div class="dish-card__footer">
-              <span class="dish-card__price">₹30</span>
-              <button class="dish-card__add-btn" onclick="addToCart('brahmins-coffee','Filter Coffee',30,'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=200&h=200&fit=crop','Brahmins Coffee Bar')">+</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Prawn Gassi -->
-        <div class="dish-card animate-in">
-          <img class="dish-card__image" src="https://images.unsplash.com/photo-1631515243349-e0cb75fb8d3a?w=400&h=300&fit=crop" alt="Prawn Gassi" loading="lazy">
-          <div class="dish-card__body">
-            <h3 class="dish-card__name">Prawn Gassi</h3>
-            <p class="dish-card__restaurant">Karavalli</p>
-            <div class="dish-card__footer">
-              <span class="dish-card__price">₹650</span>
-              <button class="dish-card__add-btn" onclick="addToCart('karavalli-prawn','Prawn Gassi',650,'https://images.unsplash.com/photo-1631515243349-e0cb75fb8d3a?w=200&h=200&fit=crop','Karavalli')">+</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============================================
-       HOW IT WORKS
-       ============================================ -->
-  <section class="how-it-works" id="how-it-works">
-    <div class="container">
-      <div class="section-header">
-        <span class="badge">🚀 Super Simple</span>
-        <h2 class="section-header__title">How BiteSwift Works</h2>
-        <p class="section-header__subtitle">Three steps to the best food at your doorstep.</p>
-      </div>
-
-      <div class="steps-grid">
-        <div class="step-card animate-in" style="background-color: var(--color-buttercream);">
-          <div class="step-card__icon">📍</div>
-          <h3 class="step-card__title">Pick Your Area</h3>
-          <p class="step-card__desc">Enter your locality — downtown, midtown, suburbs, or anywhere in the city. We'll show restaurants near you.</p>
-        </div>
-        <div class="step-card animate-in" style="background-color: var(--color-mint-wash);">
-          <div class="step-card__icon">🍽️</div>
-          <h3 class="step-card__title">Choose Your Favourites</h3>
-          <p class="step-card__desc">Browse legendary restaurants, explore menus, and add dishes to your cart. Mix and match from multiple spots.</p>
-        </div>
-        <div class="step-card animate-in" style="background-color: var(--color-lilac-mist);">
-          <div class="step-card__icon">🛵</div>
-          <h3 class="step-card__title">Delivered in Minutes</h3>
-          <p class="step-card__desc">Our delivery partners bring your city's finest food to your door — hot, fresh, and on time. Every single time.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============================================
-       WAVY DIVIDER — white to cobalt
-       ============================================ -->
-  <div class="wavy-divider wavy-divider--cobalt">
-    <svg viewBox="0 0 1440 80" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M0,40 C180,10 360,70 540,40 C720,10 900,70 1080,40 C1260,10 1380,50 1440,40 L1440,80 L0,80 Z" fill="#3366e0"/>
-    </svg>
-  </div>
-
-  <!-- ============================================
-       TESTIMONIALS
-       ============================================ -->
-  <section class="testimonials" id="testimonials">
-    <div class="container">
-      <div class="section-header">
-        <span class="badge">💬 What People Say</span>
-        <h2 class="section-header__title">Loved by Foodies</h2>
-        <p class="section-header__subtitle">Real reviews from real foodies across the country.</p>
-      </div>
-
-      <div class="testimonial-grid">
-        <!-- Testimonial 1 -->
-        <div class="testimonial-card animate-in" data-rotate="-1.5deg">
-          <div class="testimonial-card__quote">
-            Ordered MTR's Rava Idli at 7am on a Sunday — it arrived at my door in Koramangala within 30 minutes, still warm. This app is doing God's work.
-          </div>
-          <div class="testimonial-card__author">
-            <div class="testimonial-card__avatar">👩‍💻</div>
-            <div>
-              <div class="testimonial-card__name">Priya Sharma</div>
-              <div class="testimonial-card__title">Software Engineer, Koramangala</div>
-            </div>
-          </div>
-          <div class="testimonial-card__stats">
-            <div class="stat-card">
-              <div class="stat-card__number">47</div>
-              <div class="stat-card__label">Orders placed</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-card__number">4.9★</div>
-              <div class="stat-card__label">Avg rating</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Testimonial 2 -->
-        <div class="testimonial-card animate-in" data-rotate="1deg">
-          <div class="testimonial-card__quote">
-            Finally, someone who delivers Vidyarthi Bhavan's dosa without me standing in that 45-minute queue. The app respects the food — it arrives crispy.
-          </div>
-          <div class="testimonial-card__author">
-            <div class="testimonial-card__avatar">👨‍🎨</div>
-            <div>
-              <div class="testimonial-card__name">Arjun Reddy</div>
-              <div class="testimonial-card__title">Designer, Jayanagar</div>
-            </div>
-          </div>
-          <div class="testimonial-card__stats">
-            <div class="stat-card">
-              <div class="stat-card__number">₹12k</div>
-              <div class="stat-card__label">Saved in fuel</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-card__number">32</div>
-              <div class="stat-card__label">Restaurants tried</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Testimonial 3 -->
-        <div class="testimonial-card animate-in" data-rotate="-0.5deg">
-          <div class="testimonial-card__quote">
-            Late-night Empire kebabs delivered to my HSR Layout flat? Yes please. The 2am biryani hits different when you don't have to ride across the city for it.
-          </div>
-          <div class="testimonial-card__author">
-            <div class="testimonial-card__avatar">👨‍💼</div>
-            <div>
-              <div class="testimonial-card__name">Karthik Iyer</div>
-              <div class="testimonial-card__title">Product Manager, HSR Layout</div>
-            </div>
-          </div>
-          <div class="testimonial-card__stats">
-            <div class="stat-card">
-              <div class="stat-card__number">2am</div>
-              <div class="stat-card__label">Latest order</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-card__number">100%</div>
-              <div class="stat-card__label">On-time rate</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============================================
-       WAVY DIVIDER — cobalt to white
-       ============================================ -->
-  <div class="wavy-divider wavy-divider--paper" style="background-color: var(--color-cobalt-field);">
-    <svg viewBox="0 0 1440 80" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M0,25 C240,60 480,0 720,25 C960,50 1200,5 1440,25 L1440,80 L0,80 Z" fill="#ffffff"/>
-    </svg>
-  </div>
-
-  <!-- ============================================
-       CTA SECTION
-       ============================================ -->
-  <section class="cta-section" id="cta-section">
-    <div class="container">
-      <div class="cta-box">
-        <h2 class="cta-box__title">Hungry? Let's Fix That.</h2>
-        <p class="cta-box__subtitle">Join 50,000+ Bengalureans who've ditched the queue. Enter your email — we'll send you ₹200 off your first order.</p>
-        <div class="cta-box__form">
-          <input type="email" class="input-field" placeholder="Your email address" aria-label="Email for offer">
-          <button class="btn-lime" onclick="showToast('🎉 Offer sent to your email!')">
-            Get ₹200 Off
-          </button>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ============================================
-       WAVY DIVIDER — white to fog
-       ============================================ -->
-  <div class="wavy-divider wavy-divider--fog">
-    <svg viewBox="0 0 1440 60" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M0,20 C360,50 720,0 1080,20 C1260,35 1380,10 1440,20 L1440,60 L0,60 Z" fill="#f5f5f5"/>
-    </svg>
-  </div>
 
   <!-- ============================================
        FOOTER
        ============================================ -->
-  <footer class="footer" id="footer">
+  <footer class="footer">
     <div class="container">
       <div class="footer__grid">
         <div>
           <div class="footer__brand">
-            <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="14" cy="14" r="13" stroke="#000" stroke-width="1.5" fill="#a3e635"/>
-              <path d="M9 18c0-3 2.5-5 5-5s5 2 5 5" stroke="#000" stroke-width="1.5" stroke-linecap="round"/>
-              <circle cx="11" cy="11" r="1.2" fill="#000"/>
-              <circle cx="17" cy="11" r="1.2" fill="#000"/>
+            <svg class="nav__logo-svg" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="32" height="32" rx="16" fill="var(--color-lime)" fill-opacity="0.1"/>
+              <circle cx="16" cy="16" r="10" stroke="var(--color-lime)" stroke-width="2.5" stroke-dasharray="4 2"/>
+              <path d="M12 16 H20" stroke="var(--color-lime)" stroke-width="2.5"/>
             </svg>
-            BiteSwift
+            CraveLabs
           </div>
-          <p class="footer__desc">Delivering your city's most legendary food from 200+ iconic restaurants. From heritage tiffin rooms to craft brewpubs — all on one platform.</p>
+          <p class="footer__desc">High-fidelity, premium food delivery service sourcing from iconic heritage kitchen spots. Enforced by Clerk authentication structures.</p>
         </div>
         <div>
-          <h4 class="footer__column-title">Explore</h4>
-          <a href="#restaurants" class="footer__link">Restaurants</a>
-          <a href="#dishes" class="footer__link">Popular Dishes</a>
-          <a href="#categories" class="footer__link">Cuisines</a>
-          <a href="#how-it-works" class="footer__link">How It Works</a>
+          <h4 class="footer__title">Explore</h4>
+          <a href="#explore-menu" class="footer__link">Taste Profiles</a>
+          <a href="#restaurants" class="footer__link">Featured Kitchens</a>
+          <a href="#how-it-works" class="footer__link">Our Protocol</a>
         </div>
         <div>
-          <h4 class="footer__column-title">Areas</h4>
+          <h4 class="footer__title">Territories</h4>
           <a href="#" class="footer__link">Downtown</a>
-          <a href="#" class="footer__link">Midtown</a>
-          <a href="#" class="footer__link">Uptown</a>
-          <a href="#" class="footer__link">South Suburbs</a>
-          <a href="#" class="footer__link">North Side</a>
+          <a href="#" class="footer__link">Midtown Plaza</a>
+          <a href="#" class="footer__link">Uptown Ridge</a>
+          <a href="#" class="footer__link">East Suburbs</a>
         </div>
         <div>
-          <h4 class="footer__column-title">Company</h4>
-          <a href="#" class="footer__link">About Us</a>
-          <a href="#" class="footer__link">Careers</a>
-          <a href="#" class="footer__link">Partner With Us</a>
-          <a href="#" class="footer__link">Privacy Policy</a>
-          <a href="#" class="footer__link">Terms of Service</a>
+          <h4 class="footer__title">Research</h4>
+          <a href="https://godly.website" target="_blank" class="footer__link">Godly Inspiration</a>
+          <a href="https://refero.design" target="_blank" class="footer__link">Refero Design</a>
+          <a href="https://awwwards.com" target="_blank" class="footer__link">Awwwards Gallery</a>
         </div>
       </div>
-
       <div class="footer__bottom">
-        <p class="footer__copyright">© 2025 BiteSwift. Made with ❤️ for foodies.</p>
+        <p>© 2026 CraveLabs. Designed premium for all food lovers.</p>
         <div class="footer__socials">
-          <a href="#" class="footer__social-link" aria-label="Twitter">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/></svg>
-          </a>
-          <a href="#" class="footer__social-link" aria-label="Instagram">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
-          </a>
-          <a href="#" class="footer__social-link" aria-label="LinkedIn">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
-          </a>
+          <a href="#" class="footer__social" aria-label="Twitter">🕊️</a>
+          <a href="#" class="footer__social" aria-label="Instagram">📸</a>
+          <a href="#" class="footer__social" aria-label="LinkedIn">💼</a>
         </div>
       </div>
     </div>
   </footer>
 
   <!-- ============================================
-       CART SIDEBAR
+       CART SIDE-DRAWER
        ============================================ -->
   <div class="cart-overlay" id="cart-overlay"></div>
   <aside class="cart-sidebar" id="cart-sidebar">
     <div class="cart-sidebar__header">
-      <h2 class="cart-sidebar__title">Your Cart</h2>
+      <h2 style="font-size:20px; font-weight:700; letter-spacing:-0.5px;">Bites Cart</h2>
       <button class="cart-sidebar__close" onclick="closeCart()" aria-label="Close cart">✕</button>
     </div>
     <div class="cart-sidebar__items" id="cart-items">
-      <div class="cart-empty">
-        <div class="cart-empty__icon">🛒</div>
-        <p class="cart-empty__text">Your cart is empty.<br>Add some delicious dishes!</p>
-      </div>
+      <!-- Rendered dynamically -->
     </div>
     <div class="cart-sidebar__footer">
-      <div class="cart-sidebar__total">
-        <span class="cart-sidebar__total-label">Total</span>
-        <span class="cart-sidebar__total-price" id="cart-total">₹0</span>
+      <div class="cart-sidebar__row">
+        <span>Basket Total</span>
+        <span id="cart-total" style="font-weight: 700; color:var(--color-lime);">₹0</span>
       </div>
-      <button class="btn-lime cart-sidebar__checkout" onclick="window.location.href='checkout.html'">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-        Checkout
+      <button class="btn-lime cart-sidebar__checkout" style="width:100%; border-radius: var(--radius-pill); justify-content:center;" onclick="window.location.href='checkout.html'">
+        Proceed to Checkout
       </button>
     </div>
   </aside>
 
   <!-- ============================================
-       TOAST NOTIFICATION
+       TOAST POPUPS
        ============================================ -->
   <div class="toast" id="toast">
     <span class="toast__icon">✓</span>
     <span class="toast__text"></span>
   </div>
-
-  <!-- ============================================
-       SCROLL TO TOP
-       ============================================ -->
-  <button class="scroll-top" id="scroll-top" aria-label="Scroll to top">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <polyline points="18 15 12 9 6 15"/>
-    </svg>
-  </button>
 
   <!-- JavaScript -->
   <script src="script.js"></script>

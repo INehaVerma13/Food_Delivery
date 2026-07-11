@@ -3,41 +3,42 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Secure checkout for BiteSwift. Apply promo codes and select payment method.">
-  <title>Checkout — BiteSwift</title>
-  
-  <!-- Satoshi Font -->
-  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@500,700&display=swap" rel="stylesheet">
+  <meta name="description" content="Secure checkout for CraveLabs. Apply promo codes and select payment method. Enforces Clerk Google authentication.">
+  <title>Checkout — CraveLabs</title>
   
   <!-- Stylesheet -->
   <link rel="stylesheet" href="styles.css">
   
   <!-- Favicon -->
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🍛</text></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🧪</text></svg>">
+  
+  <!-- Clerk SDK via CDN -->
+  <script async crossorigin="anonymous" src="https://cdn.clerk.com/public/clerk.js" data-clerk-publishable-key="pk_test_bW9kZXJuLWhlcm9uLTgyLmNsZXJrLmFjY291bnRzLmRldiQ"></script>
 </head>
 <body>
 
   <!-- ============================================
-       NAVIGATION BAR
+       NAVIGATION BAR (GLASSMORPHIC)
        ============================================ -->
   <nav class="nav" id="main-nav">
     <a href="index.html" class="nav__logo">
-      <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="14" cy="14" r="13" stroke="#000" stroke-width="1.5" fill="#a3e635"/>
-        <path d="M9 18c0-3 2.5-5 5-5s5 2 5 5" stroke="#000" stroke-width="1.5" stroke-linecap="round"/>
-        <circle cx="11" cy="11" r="1.2" fill="#000"/>
-        <circle cx="17" cy="11" r="1.2" fill="#000"/>
+      <svg class="nav__logo-svg" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="32" height="32" rx="16" fill="var(--color-lime)" fill-opacity="0.1"/>
+        <circle cx="16" cy="16" r="10" stroke="var(--color-lime)" stroke-width="2.5" stroke-dasharray="4 2"/>
+        <path d="M12 16 H20" stroke="var(--color-lime)" stroke-width="2.5"/>
       </svg>
-      BiteSwift
+      CraveLabs
     </a>
 
     <div class="nav__links">
+      <a href="index.html#explore-menu" class="nav__link">Explore</a>
       <a href="index.html#restaurants" class="nav__link">Restaurants</a>
-      <a href="index.html#dishes" class="nav__link">Dishes</a>
     </div>
 
     <div class="nav__cta">
       <a href="index.html" class="btn-ghost btn-sm">← Back to Shop</a>
+      <!-- Clerk Authentication Widget Container -->
+      <div id="clerk-user-button"></div>
     </div>
   </nav>
 
@@ -45,31 +46,31 @@
        MAIN CHECKOUT SECTION
        ============================================ -->
   <main class="container section-gap" style="margin-top: 80px;">
-    <h1 class="text-display" style="margin-bottom: var(--spacing-32); text-align: center;">Secure Checkout</h1>
+    <h1 class="hero__title" style="font-size:40px; text-align: center; margin-bottom: 40px;">Order Checkout</h1>
     
-    <form id="checkout-main-form" class="checkout-container">
+    <form id="checkout-main-form" class="checkout-layout">
       
-      <!-- LEFT SECTION: ADDRESS & PAYMENT -->
+      <!-- LEFT COLUMN -->
       <div class="checkout-left">
         
         <!-- Address card -->
-        <div class="checkout-card animate-in">
-          <h2 class="text-heading-sm checkout-card__title" style="display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap; gap: 8px;">
+        <div class="checkout-box animate-in">
+          <h2 class="checkout-box__title" style="display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap; gap: 8px; border-bottom:1px solid var(--color-border); padding-bottom:16px;">
             <span>📍 Delivery Address</span>
-            <button type="button" class="btn-ghost btn-sm" onclick="autofillDemoAddress()" style="font-size: 11px; padding: 4px 10px; box-shadow: 1px 1px 0 #000; border-radius: var(--radius-badges);">Autofill Demo</button>
+            <button type="button" class="btn-ghost btn-sm" onclick="autofillDemoAddress()" style="font-size: 11px; padding: 4px 10px; border-radius: var(--radius-pill);">Autofill Demo</button>
           </h2>
-          <div class="form-grid">
+          <div class="form-row">
             <div class="form-group">
               <label for="address-name" class="form-label">Full Name</label>
-              <input type="text" id="address-name" class="input-field" placeholder="Enter your full name" required>
+              <input type="text" id="address-name" class="input-field" placeholder="Enter your name" required>
             </div>
             <div class="form-group">
               <label for="address-phone" class="form-label">Mobile Number</label>
-              <input type="tel" id="address-phone" class="input-field" placeholder="10-digit number" pattern="[0-9]{10}" required>
+              <input type="tel" id="address-phone" class="input-field" placeholder="10-digit phone" pattern="[0-9]{10}" required>
             </div>
             <div class="form-group form-group--full">
-              <label for="address-area" class="form-label">Delivery Address</label>
-              <textarea id="address-area" class="input-field" rows="3" placeholder="House no, Building name, Street, Area" required></textarea>
+              <label for="address-area" class="form-label">Street Address</label>
+              <textarea id="address-area" class="input-field" rows="3" placeholder="House/Flat number, Street name, Locality" required></textarea>
             </div>
             <div class="form-group">
               <label for="address-city" class="form-label">City</label>
@@ -82,9 +83,9 @@
           </div>
         </div>
 
-        <!-- Payment card -->
-        <div class="checkout-card animate-in" style="margin-top: var(--spacing-24);">
-          <h2 class="text-heading-sm checkout-card__title">💳 Payment Method</h2>
+        <!-- Payment methods -->
+        <div class="checkout-box animate-in" style="margin-top: 24px;">
+          <h2 class="checkout-box__title">💳 Payment Gateway</h2>
           
           <div class="payment-tabs">
             <button type="button" class="payment-tab payment-tab--active" data-method="card" onclick="selectPaymentMethod('card')">Credit/Debit Card</button>
@@ -92,40 +93,39 @@
             <button type="button" class="payment-tab" data-method="cod" onclick="selectPaymentMethod('cod')">Cash on Delivery</button>
           </div>
 
-          <!-- Card Payment Section -->
+          <!-- Card Section -->
           <div id="payment-sec-card" class="payment-section">
-            <!-- Brutalist virtual card visualizer -->
-            <div class="virtual-card">
-              <div class="virtual-card__chip"></div>
-              <div class="virtual-card__logo">BitesPay</div>
-              <div id="card-view-number" class="virtual-card__number">•••• •••• •••• ••••</div>
-              <div class="virtual-card__footer">
+            <div class="visual-card">
+              <div class="visual-card__chip"></div>
+              <div class="visual-card__logo" style="font-weight:700;">CravePay</div>
+              <div id="card-view-number" class="visual-card__num">•••• •••• •••• ••••</div>
+              <div class="visual-card__footer">
                 <div>
-                  <div class="virtual-card__label">CARDHOLDER</div>
-                  <div id="card-view-name" class="virtual-card__val">YOUR NAME</div>
+                  <div>HOLDER</div>
+                  <div id="card-view-name" class="visual-card__val">YOUR NAME</div>
                 </div>
                 <div>
-                  <div class="virtual-card__label">EXPIRES</div>
-                  <div id="card-view-expiry" class="virtual-card__val">MM/YY</div>
+                  <div>EXPIRES</div>
+                  <div id="card-view-expiry" class="visual-card__val">MM/YY</div>
                 </div>
               </div>
             </div>
 
-            <div class="form-grid">
+            <div class="form-row">
               <div class="form-group form-group--full">
                 <label for="cc-number" class="form-label">Card Number</label>
-                <input type="text" id="cc-number" class="input-field" placeholder="1234 5678 9101 1121" maxlength="19">
+                <input type="text" id="cc-number" class="input-field" placeholder="4321 8765 9811 0021" maxlength="19">
               </div>
               <div class="form-group form-group--full">
                 <label for="cc-name" class="form-label">Cardholder Name</label>
-                <input type="text" id="cc-name" class="input-field" placeholder="Name written on card">
+                <input type="text" id="cc-name" class="input-field" placeholder="Full name on card">
               </div>
               <div class="form-group">
-                <label for="cc-expiry" class="form-label">Expiry Date</label>
+                <label for="cc-expiry" class="form-label">Expiration Date</label>
                 <input type="text" id="cc-expiry" class="input-field" placeholder="MM/YY" maxlength="5">
               </div>
               <div class="form-group">
-                <label for="cc-cvv" class="form-label">CVV</label>
+                <label for="cc-cvv" class="form-label">CVV Code</label>
                 <input type="password" id="cc-cvv" class="input-field" placeholder="***" maxlength="3">
               </div>
             </div>
@@ -134,9 +134,8 @@
           <!-- UPI Section -->
           <div id="payment-sec-upi" class="payment-section" style="display:none; text-align:center;">
             <div class="upi-box">
-              <div class="upi-box__qr">
-                <!-- Mock QR Code SVG -->
-                <svg width="150" height="150" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" style="border: 2px solid #000; padding: var(--spacing-8); background:#fff;">
+              <div class="upi-box__qr" style="background:#fff; border: 2px solid #000; padding:12px; display:inline-block; border-radius:12px;">
+                <svg width="140" height="140" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <rect x="5" y="5" width="20" height="20" fill="black"/>
                   <rect x="9" y="9" width="12" height="12" fill="white"/>
                   <rect x="75" y="5" width="20" height="20" fill="black"/>
@@ -144,7 +143,7 @@
                   <rect x="5" y="75" width="20" height="20" fill="black"/>
                   <rect x="9" y="79" width="12" height="12" fill="white"/>
                   
-                  <rect x="35" y="15" width="10" height="5" fill="black"/>
+                  <rect x="35" y="15" width="15" height="5" fill="black"/>
                   <rect x="55" y="5" width="5" height="15" fill="black"/>
                   <rect x="40" y="35" width="25" height="5" fill="black"/>
                   <rect x="30" y="45" width="10" height="20" fill="black"/>
@@ -154,7 +153,7 @@
                   <rect x="80" y="40" width="10" height="15" fill="black"/>
                 </svg>
               </div>
-              <p class="text-body-sm" style="margin-top: var(--spacing-16);"><strong>Scan to Pay:</strong> Open BHIM, Google Pay, PhonePe, or Paytm and scan to pay instantly.</p>
+              <p style="margin-top:16px; font-size:14px; color:var(--color-text-muted);">Scan via secure BHIM, GPay, PhonePe, or Paytm apps to verify transaction.</p>
             </div>
           </div>
 
@@ -162,8 +161,8 @@
           <div id="payment-sec-cod" class="payment-section" style="display:none;">
             <div class="cod-box">
               <div class="cod-box__icon">🛵</div>
-              <p class="text-body"><strong>Cash/UPI on Delivery</strong></p>
-              <p class="text-body-sm" style="color:var(--color-steel); margin-top: var(--spacing-4);">Pay the rider via cash or UPI scan when your food package reaches your doorstep.</p>
+              <h4 style="font-size:16px; font-weight:700; color:#fff; margin-bottom:4px;">Cash/UPI on Delivery</h4>
+              <p style="font-size:13px; color:var(--color-text-muted);">Settle payment directly with rider via cash or scan code on arrival.</p>
             </div>
           </div>
 
@@ -171,14 +170,14 @@
 
       </div>
 
-      <!-- RIGHT SECTION: ORDER & COUPON BILLING -->
+      <!-- RIGHT COLUMN -->
       <div class="checkout-right">
         
-        <!-- Coupon Card -->
-        <div class="checkout-card animate-in">
-          <h2 class="text-heading-sm checkout-card__title">🏷️ Apply Coupon</h2>
+        <!-- Coupon box -->
+        <div class="checkout-box animate-in">
+          <h2 class="checkout-box__title">🏷️ Apply Coupon</h2>
           <div class="coupon-field">
-            <input type="text" id="coupon-input" class="input-field" placeholder="Enter Coupon Code" style="text-transform: uppercase;">
+            <input type="text" id="coupon-input" class="input-field" placeholder="PROMOCODE" style="text-transform: uppercase;">
             <button type="button" class="btn-lime btn-sm" onclick="applyCoupon()">Apply</button>
           </div>
           <div class="coupon-suggestions">
@@ -193,13 +192,13 @@
           </div>
         </div>
 
-        <!-- Billing Summary -->
-        <div class="checkout-card animate-in" style="margin-top: var(--spacing-24);">
+        <!-- Billing totals -->
+        <div class="checkout-box animate-in" style="margin-top: 24px;">
           <div id="checkout-items-summary">
-            <!-- Rendered by script.js -->
+            <!-- Loaded dynamically -->
           </div>
           
-          <button type="submit" id="checkout-pay-btn" class="btn-lime" style="width: 100%; margin-top: var(--spacing-24); justify-content: center; height: 50px; font-size: var(--text-body);">
+          <button type="submit" id="checkout-pay-btn" class="btn-lime" style="width: 100%; margin-top: 24px; justify-content: center; height: 50px; border-radius: var(--radius-pill);">
             Place Order
           </button>
         </div>
@@ -210,7 +209,7 @@
   </main>
 
   <!-- ============================================
-       TOAST NOTIFICATION
+       TOAST POPUPS
        ============================================ -->
   <div class="toast" id="toast">
     <span class="toast__icon">✓</span>
@@ -218,13 +217,13 @@
   </div>
 
   <!-- ============================================
-       PROCESSING OVERLAY
+       PROCESSING OVERLAY (AUTH/SECURE GATE)
        ============================================ -->
   <div id="processing-overlay" class="processing-overlay" style="display: none;">
     <div class="processing-box">
       <div class="processing-spinner"></div>
-      <h3 class="text-heading-sm" style="margin-top: var(--spacing-16);">Verifying Payment & Order...</h3>
-      <p class="text-body-sm" style="color: var(--color-steel); margin-top: var(--spacing-8);">Connecting to BitesPay secure gateway</p>
+      <h3 class="bento-card__title" style="margin-bottom:12px; font-size:22px; font-weight:700;">Verifying Clerk Authenticity...</h3>
+      <p style="color:var(--color-text-muted); font-size:14px;">Contacting secure Google/Clerk OAuth structure</p>
     </div>
   </div>
 

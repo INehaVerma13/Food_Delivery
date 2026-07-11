@@ -3,35 +3,36 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Track your food delivery live on BiteSwift.">
-  <title>Track Order — BiteSwift</title>
-  
-  <!-- Satoshi Font -->
-  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@500,700&display=swap" rel="stylesheet">
+  <meta name="description" content="Track your food delivery live on CraveLabs. Visual maps, moving courier nodes, timeline tracking.">
+  <title>Track Order — CraveLabs</title>
   
   <!-- Stylesheet -->
   <link rel="stylesheet" href="styles.css">
   
   <!-- Favicon -->
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🍛</text></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🧪</text></svg>">
+  
+  <!-- Clerk SDK via CDN -->
+  <script async crossorigin="anonymous" src="https://cdn.clerk.com/public/clerk.js" data-clerk-publishable-key="pk_test_bW9kZXJuLWhlcm9uLTgyLmNsZXJrLmFjY291bnRzLmRldiQ"></script>
 </head>
 <body>
 
   <!-- ============================================
-       NAVIGATION BAR
+       NAVIGATION BAR (GLASSMORPHIC)
        ============================================ -->
   <nav class="nav" id="main-nav">
     <a href="index.html" class="nav__logo">
-      <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="14" cy="14" r="13" stroke="#000" stroke-width="1.5" fill="#a3e635"/>
-        <path d="M9 18c0-3 2.5-5 5-5s5 2 5 5" stroke="#000" stroke-width="1.5" stroke-linecap="round"/>
-        <circle cx="11" cy="11" r="1.2" fill="#000"/>
-        <circle cx="17" cy="11" r="1.2" fill="#000"/>
+      <svg class="nav__logo-svg" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="32" height="32" rx="16" fill="var(--color-lime)" fill-opacity="0.1"/>
+        <circle cx="16" cy="16" r="10" stroke="var(--color-lime)" stroke-width="2.5" stroke-dasharray="4 2"/>
+        <path d="M12 16 H20" stroke="var(--color-lime)" stroke-width="2.5"/>
       </svg>
-      BiteSwift
+      CraveLabs
     </a>
     <div class="nav__cta">
       <a href="index.html" class="btn-ghost btn-sm">Home</a>
+      <!-- Clerk Authentication Widget Container -->
+      <div id="clerk-user-button"></div>
     </div>
   </nav>
 
@@ -41,99 +42,96 @@
   <main class="container section-gap" style="margin-top: 80px; max-width: 1000px;">
     
     <!-- Top Details -->
-    <div class="track-header animate-in">
+    <div class="track-header animate-in" style="border-bottom:1px solid var(--color-border); padding-bottom:24px; margin-bottom:32px;">
       <div>
-        <span class="badge badge--lime" id="track-status-banner">Preparing your food...</span>
-        <h1 class="text-heading-lg" style="margin-top: var(--spacing-8);">Tracking Your Order</h1>
-        <p class="text-body-sm" style="color:var(--color-steel);">Order ID: #BB-9876543 · From <strong id="track-merchant">MTR — Mavalli Tiffin Rooms</strong></p>
+        <span class="badge badge--lime" id="track-status-banner">Authenticating order details...</span>
+        <h1 class="hero__title" style="font-size:36px; margin-top:12px; margin-bottom:8px; text-align:left;">Courier Dispatch Progress</h1>
+        <p style="color:var(--color-text-muted); font-size:14px;">Order Code: #CL-88741002 · Sourced from <strong id="track-merchant" style="color:#fff;">Local Kitchens</strong></p>
       </div>
       <div class="track-eta">
-        <div class="track-eta__label">ESTIMATED ARRIVAL</div>
-        <div class="track-eta__time">15 mins</div>
+        <div class="track-eta__label">EXPECTED ARRIVAL</div>
+        <div class="track-eta__time" style="color:var(--color-lime);">12 mins</div>
       </div>
     </div>
 
-    <!-- Map & Details Grid -->
-    <div class="track-grid" style="margin-top: var(--spacing-24);">
+    <!-- Map and Timeline Grid -->
+    <div class="tracking-grid">
       
       <!-- Map Column -->
       <div class="track-left animate-in">
-        <div class="checkout-card" style="padding: 0; overflow: hidden; position: relative;">
-          <!-- Header for Map Card -->
+        <div class="map-wrapper">
           <div class="map-header">
-            <span>Rider Route Map</span>
-            <span class="map-header__status">Rider Moving Live</span>
+            <span>Live Vector Route Map</span>
+            <span class="map-header__status">Courier Active</span>
           </div>
 
-          <!-- Custom SVG / CSS Map Layout -->
-          <div class="track-map">
-            
-            <!-- Map Road Grids (Vector) -->
-            <svg class="track-map__grid" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+          <div class="map-viewport">
+            <!-- Road grids pattern background -->
+            <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" style="position:absolute; top:0; left:0;">
               <defs>
-                <pattern id="gridPattern" width="60" height="60" patternUnits="userSpaceOnUse">
-                  <path d="M 60 0 L 0 0 0 60" fill="none" stroke="#ddd" stroke-width="1.5"/>
+                <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                  <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
                 </pattern>
               </defs>
-              <rect width="100%" height="100%" fill="url(#gridPattern)" />
+              <rect width="100%" height="100%" fill="url(#grid)" />
               
-              <!-- Custom Mock Roads -->
-              <path d="M 50 150 L 550 150" stroke="#b0b0b0" stroke-width="24" stroke-linecap="round"/>
-              <path d="M 100 50 L 100 250" stroke="#b0b0b0" stroke-width="20" stroke-linecap="round"/>
-              <path d="M 300 50 L 300 250" stroke="#b0b0b0" stroke-width="20" stroke-linecap="round"/>
-              <path d="M 500 50 L 500 250" stroke="#b0b0b0" stroke-width="20" stroke-linecap="round"/>
+              <!-- Roads -->
+              <path d="M 50 200 L 550 200" stroke="#1c1c24" stroke-width="20" stroke-linecap="round"/>
+              <path d="M 100 80 L 100 320" stroke="#1c1c24" stroke-width="16" stroke-linecap="round"/>
+              <path d="M 300 80 L 300 320" stroke="#1c1c24" stroke-width="16" stroke-linecap="round"/>
+              <path d="M 480 80 L 480 320" stroke="#1c1c24" stroke-width="16" stroke-linecap="round"/>
               
-              <!-- Delivery Route Base Line -->
-              <path d="M 80 150 L 480 150" stroke="#777" stroke-width="6" stroke-dasharray="8 6" stroke-linecap="round"/>
+              <!-- Dotted path -->
+              <path d="M 80 200 L 480 200" stroke="#333" stroke-width="4" stroke-dasharray="6 6"/>
             </svg>
 
-            <!-- Active Traversed Path line -->
-            <div id="track-map-progress-line" class="track-map__progress-line"></div>
+            <!-- Traversed route progress line -->
+            <div id="track-map-progress-line" class="map-line"></div>
 
-            <!-- Merchant Node Marker -->
-            <div class="map-node map-node--merchant" style="left: 80px; top: 150px;">
-              <div class="map-node__pin">🏢</div>
-              <div class="map-node__label">RESTAURANT</div>
+            <!-- Merchant pin node -->
+            <div class="map-node" style="left: 80px; top: 200px;">
+              <div class="map-node__icon">🏢</div>
+              <div class="map-node__label">KITCHEN</div>
             </div>
 
-            <!-- Home Node Marker -->
-            <div class="map-node map-node--home" style="left: 480px; top: 150px;">
-              <div class="map-node__pin">🏠</div>
-              <div class="map-node__label">YOUR HOME</div>
+            <!-- Home pin node -->
+            <div class="map-node" style="left: 480px; top: 200px;">
+              <div class="map-node__icon">🏠</div>
+              <div class="map-node__label">DESTINATION</div>
             </div>
 
-            <!-- Moving Delivery Rider Icon -->
-            <div id="driver-svg-courier" class="map-driver" style="left: 80px; top: 150px;">
-              <div class="map-driver__circle">🛵</div>
-              <div class="map-driver__pulse"></div>
+            <!-- Moving Courier -->
+            <div id="driver-svg-courier" class="map-rider">
+              <div class="map-rider__dot">🛵</div>
             </div>
 
           </div>
         </div>
       </div>
 
-      <!-- Steps Timeline Column -->
+      <!-- Timeline Column -->
       <div class="track-right animate-in">
         
-        <!-- Timeline steps card -->
-        <div class="checkout-card" id="track-timeline">
-          <!-- Filled dynamically via javascript -->
+        <!-- Steps List -->
+        <div class="checkout-box" id="track-timeline">
+          <!-- Filled dynamically -->
         </div>
 
         <!-- Rider Profile Card -->
-        <div class="checkout-card" style="margin-top: var(--spacing-24);">
-          <h3 class="text-heading-sm" style="margin-bottom: var(--spacing-16);">Delivery Partner</h3>
-          <div class="rider-profile">
-            <div class="rider-profile__avatar">R</div>
-            <div class="rider-profile__info">
-              <h4 class="rider-profile__name">Ramesh K.</h4>
-              <p class="rider-profile__rating">⭐ 4.9 · 1,200+ deliveries</p>
-              <p class="rider-profile__vehicle">KA-05-EX-4321 (TVS Apache - Grey)</p>
+        <div class="checkout-box" style="margin-top: 24px;">
+          <h3 class="form-label" style="font-size:16px; color:#fff; margin-bottom:16px;">Courier Assignment</h3>
+          
+          <div style="display:flex; align-items:center; gap:16px; margin-bottom:16px;">
+            <div style="width:48px; height:48px; border-radius:50%; background:var(--color-border-accent); display:flex; align-items:center; justify-content:center; font-size:20px; font-weight:700; border:1px solid var(--color-border);">R</div>
+            <div>
+              <h4 style="font-size:16px; font-weight:700; color:#fff;">Ramesh K.</h4>
+              <p style="font-size:12px; color:var(--color-lime);">⭐ 4.9 · tvs apache (KA-05-EX-4321)</p>
             </div>
           </div>
-          <div class="rider-actions">
-            <button class="btn-ghost btn-sm" style="flex:1; justify-content:center;" onclick="showToast('💬 Ramesh: I am on my way!')">Chat with Ramesh</button>
-            <button class="btn-ghost btn-sm" style="flex:1; justify-content:center;" onclick="showToast('📞 Connecting you securely...')">Call Support</button>
+
+          <div style="display:flex; gap:12px;">
+            <button class="btn-ghost btn-sm" style="flex:1; justify-content:center; border-radius:var(--radius-pill);" onclick="showToast('💬 Ramesh K: Picking up now!')">Chat With Rider</button>
+            <button class="btn-ghost btn-sm" style="flex:1; justify-content:center; border-radius:var(--radius-pill);" onclick="showToast('📞 Ringing Support Service...')">Call Support</button>
           </div>
         </div>
 
@@ -144,9 +142,9 @@
   </main>
 
   <!-- ============================================
-       CONFETTI EFFECT OVERLAY
+       CONFETTI CANVAS OVERLAY
        ============================================ -->
-  <div id="confetti-wrapper" class="confetti-wrapper"></div>
+  <div id="confetti-canvas-overlay" class="confetti-canvas"></div>
 
   <!-- JavaScript -->
   <script src="script.js"></script>

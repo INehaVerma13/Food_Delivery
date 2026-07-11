@@ -1,10 +1,11 @@
 /* ============================================
-   🍽️ BiteSwift — JavaScript (Core Logic)
-   Cart, Cuisines, Multi-page Routing & Simulators
+   🧪 CraveLabs — JavaScript (Core Logic)
+   Clerk Google Auth, Cuisines, Multi-page Shared Cart
+   Bento Micro-interactions & Order Tracking Timelines
    ============================================ */
 
 // ============================================
-// 1. RESTAURANTS & DETAILED MENUS DATA
+// 1. DATA CENTER: 9 LEGENDARY RESTAURANTS & CATEGORIZED MENUS
 // ============================================
 const restaurantsData = {
   "mtr": {
@@ -170,7 +171,6 @@ const restaurantsData = {
 const cart = {
   items: [],
 
-  // Load cart from LocalStorage
   load() {
     const saved = localStorage.getItem("biteswift_cart");
     if (saved) {
@@ -184,7 +184,6 @@ const cart = {
     updateCartBadge();
   },
 
-  // Save cart to LocalStorage
   save() {
     localStorage.setItem("biteswift_cart", JSON.stringify(this.items));
   },
@@ -247,30 +246,29 @@ const cart = {
   },
 
   render() {
-    // Dynamic binding to multiple possible cart-item containers across pages
     const container = document.getElementById('cart-items');
     const totalEl = document.getElementById('cart-total');
 
     if (container) {
       if (this.items.length === 0) {
         container.innerHTML = `
-          <div class="cart-empty">
-            <div class="cart-empty__icon">🛒</div>
-            <p class="cart-empty__text">Your cart is empty.<br>Add some delicious dishes!</p>
+          <div class="cart-empty" style="text-align:center; padding: 48px var(--spacing-24);">
+            <div style="font-size:48px; margin-bottom:16px;">🛒</div>
+            <p style="color:var(--color-text-muted);">Your cart is empty.<br>Add some delicious dishes!</p>
           </div>
         `;
         if (totalEl) totalEl.textContent = '₹0';
       } else {
         container.innerHTML = this.items.map(item => `
           <div class="cart-item">
-            <img class="cart-item__image" src="${item.image}" alt="${item.name}" loading="lazy">
+            <img class="cart-item__img" src="${item.image}" alt="${item.name}" loading="lazy">
             <div class="cart-item__info">
               <div class="cart-item__name">${item.name}</div>
               <div class="cart-item__restaurant">${item.restaurant}</div>
               <div class="cart-item__controls">
-                <button class="cart-item__qty-btn" onclick="cart.updateQty('${item.id}', -1)">−</button>
+                <button class="cart-item__btn" onclick="cart.updateQty('${item.id}', -1)">−</button>
                 <span class="cart-item__qty">${item.qty}</span>
-                <button class="cart-item__qty-btn" onclick="cart.updateQty('${item.id}', 1)">+</button>
+                <button class="cart-item__btn" onclick="cart.updateQty('${item.id}', 1)">+</button>
               </div>
             </div>
             <div class="cart-item__price">₹${item.price * item.qty}</div>
@@ -280,7 +278,6 @@ const cart = {
       }
     }
 
-    // Trigger page-specific bindings if they exist
     if (typeof renderCheckoutSummary === 'function') {
       renderCheckoutSummary();
     }
@@ -288,7 +285,82 @@ const cart = {
 };
 
 // ============================================
-// 3. COMMON INTERACTION MODULES
+// 3. SECURE GATE: INTEGRATED CLERK AUTHENTICATION (CDN IMPLEMENTATION)
+// ============================================
+let userAuthSession = null;
+
+async function initClerkAuth() {
+  const userButtonDiv = document.getElementById('clerk-user-button');
+  
+  if (window.Clerk) {
+    try {
+      await window.Clerk.load();
+      
+      // Update global user authentication reference
+      userAuthSession = window.Clerk.user;
+
+      if (userButtonDiv) {
+        if (window.Clerk.user) {
+          window.Clerk.mountUserButton(userButtonDiv);
+        } else {
+          userButtonDiv.innerHTML = `<button class="btn-ghost btn-sm" onclick="window.Clerk.openSignIn()" style="border-radius: var(--radius-pill); font-weight:700;">Login</button>`;
+        }
+      }
+    } catch (e) {
+      console.warn("Clerk load issue, loading generic authentication simulator instead.", e);
+      setupMockAuth();
+    }
+  } else {
+    setupMockAuth();
+  }
+}
+
+// Fallback Mock Authentication UI for demo/environments where Clerk SDK is blocked
+function setupMockAuth() {
+  const userButtonDiv = document.getElementById('clerk-user-button');
+  if (!userButtonDiv) return;
+
+  const mockUser = localStorage.getItem("cravelabs_mock_user");
+  if (mockUser) {
+    userAuthSession = JSON.parse(mockUser);
+    userButtonDiv.innerHTML = `
+      <div style="display:flex; align-items:center; gap:8px;">
+        <div style="width:32px; height:32px; border-radius:50%; background:var(--color-lime); color:var(--color-void); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; cursor:pointer;" onclick="mockSignOut()">N</div>
+        <button class="btn-ghost btn-sm" onclick="mockSignOut()" style="padding:4px 10px; font-size:11px;">Log out</button>
+      </div>
+    `;
+  } else {
+    userButtonDiv.innerHTML = `<button class="btn-ghost btn-sm" onclick="mockSignIn()" style="border-radius: var(--radius-pill); font-weight:700;">Login</button>`;
+  }
+}
+
+window.mockSignIn = function() {
+  userAuthSession = { name: "Neha Verma", email: "nehaverma01304@gmail.com" };
+  localStorage.setItem("cravelabs_mock_user", JSON.stringify(userAuthSession));
+  showToast("🔐 Successfully logged in via Google!");
+  setupMockAuth();
+};
+
+window.mockSignOut = function() {
+  userAuthSession = null;
+  localStorage.removeItem("cravelabs_mock_user");
+  showToast("🔒 Logged out successfully");
+  setupMockAuth();
+};
+
+// Enforces login gate before checkout
+function verifyUserLogin() {
+  if (window.Clerk && window.Clerk.user) {
+    return true;
+  }
+  if (userAuthSession) {
+    return true;
+  }
+  return false;
+}
+
+// ============================================
+// 4. COMMON SIDE-DRAWER INTERACTIONS
 // ============================================
 function openCart() {
   const overlay = document.getElementById('cart-overlay');
@@ -351,74 +423,73 @@ function initScrollTop() {
   });
 }
 
-function initSmoothScroll() {
-  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function(e) {
-      const targetId = this.getAttribute('href');
-      if (targetId === '#') return;
-      
-      const target = document.querySelector(targetId);
-      if (target) {
-        e.preventDefault();
-        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        document.getElementById('main-nav')?.classList.remove('nav--mobile-open');
-      }
-    });
-  });
-}
-
 // ============================================
-// 4. LANDING PAGE SPECIFIC MODULES
+// 5. LANDING PAGE CUISINE AND VEG FILTERS
 // ============================================
 function initLandingPage() {
-  // Category Filtering
-  window.filterByCategory = function(category) {
-    const cards = document.querySelectorAll('.restaurant-card');
-    const categoryCards = document.querySelectorAll('.category-card');
-
-    categoryCards.forEach(card => {
-      if (card.dataset.category === category || category === 'all') {
-        card.style.opacity = '1';
-        card.style.transform = 'scale(1.02)';
-      } else {
-        card.style.opacity = '0.6';
-        card.style.transform = 'scale(1)';
-      }
+  // Bento interactive hover grid beams
+  document.querySelectorAll('.bento-card').forEach(card => {
+    card.addEventListener('mousemove', (e) => {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      card.style.setProperty('--x', `${x}px`);
+      card.style.setProperty('--y', `${y}px`);
     });
+  });
 
+  let currentCuisineFilter = 'all';
+  let isVegOnly = false;
+
+  window.filterByCuisine = function(cuisine, btnEl) {
+    currentCuisineFilter = cuisine;
+    
+    // Toggle active filter button
+    const buttons = document.querySelectorAll('.filters-group .filter-btn');
+    buttons.forEach(btn => btn.classList.remove('filter-btn--active'));
+    if (btnEl) btnEl.classList.add('filter-btn--active');
+    
+    applyFilters();
+  };
+
+  window.toggleVegOnlyFilter = function(btnEl) {
+    isVegOnly = !isVegOnly;
+    if (btnEl) {
+      btnEl.classList.toggle('filter-btn--active', isVegOnly);
+    }
+    applyFilters();
+  };
+
+  function applyFilters() {
+    const cards = document.querySelectorAll('.restaurant-card');
     cards.forEach(card => {
-      if (category === 'all' || card.dataset.category === category) {
-        card.style.display = '';
+      const cardCategory = card.dataset.category || '';
+      const cardVeg = card.dataset.veg === 'true';
+
+      const matchCuisine = (currentCuisineFilter === 'all' || cardCategory === currentCuisineFilter);
+      const matchVeg = (!isVegOnly || cardVeg);
+
+      if (matchCuisine && matchVeg) {
+        card.style.display = 'block';
         card.style.animation = 'fadeIn 0.3s ease forwards';
       } else {
         card.style.display = 'none';
       }
     });
-  };
+  }
 
-  // Search Logic
+  // Live Instant Search input listener
   const searchInput = document.getElementById('hero-search');
   if (searchInput) {
     searchInput.addEventListener('input', (e) => {
       const query = e.target.value.toLowerCase().trim();
       const restaurantCards = document.querySelectorAll('.restaurant-card');
-      const dishCards = document.querySelectorAll('.dish-card');
 
       restaurantCards.forEach(card => {
         const name = card.querySelector('.restaurant-card__name')?.textContent.toLowerCase() || '';
-        const cuisine = card.querySelector('.restaurant-card__cuisine')?.textContent.toLowerCase() || '';
-        if (name.includes(query) || cuisine.includes(query) || query === '') {
-          card.style.display = '';
-        } else {
-          card.style.display = 'none';
-        }
-      });
-
-      dishCards.forEach(card => {
-        const name = card.querySelector('.dish-card__name')?.textContent.toLowerCase() || '';
-        const restaurant = card.querySelector('.dish-card__restaurant')?.textContent.toLowerCase() || '';
-        if (name.includes(query) || restaurant.includes(query) || query === '') {
-          card.style.display = '';
+        const cuisineStr = card.querySelector('.restaurant-card__cuisine')?.textContent.toLowerCase() || '';
+        if (name.includes(query) || cuisineStr.includes(query) || query === '') {
+          card.style.display = 'block';
         } else {
           card.style.display = 'none';
         }
@@ -428,7 +499,7 @@ function initLandingPage() {
 }
 
 // ============================================
-// 5. DYNAMIC RESTAURANT PAGE LOADER
+// 6. RESTAURANT DETAILS PAGE & CATEGORY TAB BINDINGS
 // ============================================
 function initRestaurantPage() {
   const params = new URLSearchParams(window.location.search);
@@ -436,26 +507,23 @@ function initRestaurantPage() {
   const restaurant = restaurantsData[restaurantId];
 
   if (!restaurant) {
-    // Redirect to home if ID is invalid
     window.location.href = "index.html";
     return;
   }
 
-  // Set page title
-  document.title = `${restaurant.name} Menu — BiteSwift`;
+  document.title = `${restaurant.name} Menu — CraveLabs`;
 
-  // Render Header Details
-  const container = document.getElementById('restaurant-detail-header');
-  if (container) {
-    container.innerHTML = `
-      <div class="rest-hero" style="background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.6)), url('${restaurant.image}')">
+  const header = document.getElementById('restaurant-detail-header');
+  if (header) {
+    header.innerHTML = `
+      <div class="rest-hero" style="background-image: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.85)), url('${restaurant.image}')">
         <div class="rest-hero__content">
           <div class="rest-hero__eyebrow">
-            <span class="badge badge--lime">${restaurant.veg ? 'Pure Veg' : 'Veg & Non-Veg'}</span>
+            <span class="badge badge--lime">${restaurant.veg ? '🟢 PURE VEG' : '🔴 VEG & NON-VEG'}</span>
             <span class="badge">📍 ${restaurant.location}</span>
           </div>
-          <h1 class="rest-hero__title text-display">${restaurant.name}</h1>
-          <p class="rest-hero__cuisine">${restaurant.cuisine}</p>
+          <h1 class="rest-hero__title" style="font-size:48px; font-weight:700; letter-spacing: -1.5px; margin-bottom:8px;">${restaurant.name}</h1>
+          <p class="rest-hero__cuisine" style="color:var(--color-text-muted); font-size:16px; margin-bottom:20px;">${restaurant.cuisine}</p>
           <div class="rest-hero__meta">
             <span class="restaurant-card__rating">★ ${restaurant.rating}</span>
             <span class="badge">🛵 ${restaurant.deliveryTime}</span>
@@ -466,33 +534,31 @@ function initRestaurantPage() {
     `;
   }
 
-  // Render Menu Container
   const menuContainer = document.getElementById('restaurant-menu-container');
   if (menuContainer) {
-    // Generate menu layout
     let html = `
       <div class="menu-filters">
         <div class="menu-filters__left">
-          <button class="btn-ghost btn-sm btn-active" onclick="filterMenu('all')">Full Menu</button>
-          <button class="btn-ghost btn-sm" onclick="filterMenu('veg')">🟢 Veg Only</button>
-          <button class="btn-ghost btn-sm" onclick="filterMenu('nonveg')">🔴 Non-Veg</button>
+          <button class="filter-btn filter-btn--active" onclick="filterMenu('all')">Full Menu</button>
+          <button class="filter-btn" onclick="filterMenu('veg')">🟢 Veg Only</button>
+          <button class="filter-btn" onclick="filterMenu('nonveg')">🔴 Non-Veg</button>
         </div>
       </div>
-      <div class="menu-list">
+      <div class="menu-grid">
     `;
 
     restaurant.menu.forEach(item => {
       html += `
-        <div class="menu-item-card animate-in" data-veg="${item.isVeg}">
-          <div class="menu-item-card__left">
-            <span class="menu-item-card__indicator ${item.isVeg ? 'veg' : 'nonveg'}"></span>
-            <h3 class="menu-item-card__name">${item.name}</h3>
-            <span class="menu-item-card__price">₹${item.price}</span>
-            <p class="menu-item-card__desc">${item.desc}</p>
+        <div class="menu-item animate-in" data-veg="${item.isVeg}">
+          <div class="menu-item__details">
+            <span class="menu-item__indicator ${item.isVeg ? 'menu-item__indicator--veg' : 'menu-item__indicator--nonveg'}"></span>
+            <h3 class="menu-item__name">${item.name}</h3>
+            <span class="menu-item__price">₹${item.price}</span>
+            <p class="menu-item__desc">${item.desc}</p>
           </div>
-          <div class="menu-item-card__right">
-            <img class="menu-item-card__img" src="${item.image}" alt="${item.name}" loading="lazy">
-            <button class="btn-lime btn-sm menu-item-card__add-btn" 
+          <div class="menu-item__right">
+            <img class="menu-item__img" src="${item.image}" alt="${item.name}" loading="lazy">
+            <button class="btn-lime btn-sm menu-item__add-btn" 
               onclick="addToCart('${item.id}', '${item.name}', ${item.price}, '${item.image}', '${restaurant.name}')">
               ADD +
             </button>
@@ -505,17 +571,15 @@ function initRestaurantPage() {
     menuContainer.innerHTML = html;
   }
 
-  // Filter Menu Helper
   window.filterMenu = function(filter) {
-    const items = document.querySelectorAll('.menu-item-card');
+    const items = document.querySelectorAll('.menu-item');
     const buttons = document.querySelectorAll('.menu-filters button');
     
-    // Toggle active button style
     buttons.forEach(btn => {
       if (btn.innerText.toLowerCase().includes(filter)) {
-        btn.classList.add('btn-active');
+        btn.classList.add('filter-btn--active');
       } else {
-        btn.classList.remove('btn-active');
+        btn.classList.remove('filter-btn--active');
       }
     });
 
@@ -533,20 +597,20 @@ function initRestaurantPage() {
 }
 
 // ============================================
-// 6. CHECKOUT & COUPON SIMULATOR MODULE
+// 7. CHECKOUT / AUTH GUARD & SIMULATIONS
 // ============================================
 let activeDiscount = 0;
 let appliedCouponCode = "";
 
 function initCheckoutPage() {
   if (cart.items.length === 0) {
-    const mainCheckout = document.querySelector('.checkout-container');
+    const mainCheckout = document.querySelector('.checkout-layout');
     if (mainCheckout) {
       mainCheckout.innerHTML = `
-        <div class="checkout-empty" style="text-align:center; padding: 100px 24px;">
+        <div class="checkout-empty" style="text-align:center; padding: 100px 24px; background:var(--color-panel); border: 1px solid var(--color-border); border-radius:var(--radius-bento);">
           <div style="font-size: 64px; margin-bottom: 24px;">🍱</div>
-          <h2 class="text-heading-lg" style="margin-bottom: 16px;">Your basket is empty!</h2>
-          <p style="margin-bottom: 32px;">Go back to the homepage to order from your city's finest restaurants.</p>
+          <h2 class="text-display" style="margin-bottom: 16px; font-size:32px;">Your basket is empty!</h2>
+          <p style="margin-bottom: 32px; color:var(--color-text-muted);">Go back to the homepage to order from CraveLabs' finest restaurants.</p>
           <a href="index.html" class="btn-lime">Explore Restaurants</a>
         </div>
       `;
@@ -561,7 +625,7 @@ function initCheckoutPage() {
     const subtotal = cart.getTotal();
     const packingFee = 20;
     const deliveryFee = subtotal > 500 ? 0 : 30;
-    const gst = Math.round(subtotal * 0.05); // 5% GST
+    const gst = Math.round(subtotal * 0.05);
     
     let discount = 0;
     if (appliedCouponCode === "CRAVE50") {
@@ -573,60 +637,57 @@ function initCheckoutPage() {
     const finalTotal = Math.max(0, subtotal + packingFee + deliveryFee + gst - discount);
 
     container.innerHTML = `
-      <div class="summary-section">
-        <h3 class="summary-title text-heading-sm">Order Summary</h3>
-        <div class="summary-list">
+      <div style="margin-bottom: 24px;">
+        <h3 class="form-label" style="font-size:16px; margin-bottom:16px; color:#fff;">Order Summary</h3>
+        <div style="display:flex; flex-direction:column; gap:12px;">
           ${cart.items.map(item => `
-            <div class="summary-item">
-              <span class="summary-item__qty">${item.qty} x</span>
-              <span class="summary-item__name">${item.name}</span>
-              <span class="summary-item__price">₹${item.price * item.qty}</span>
+            <div style="display:flex; justify-content:space-between; font-size:14px;">
+              <span style="color:var(--color-text-muted);"><span style="color:#fff; font-weight:700;">${item.qty}x</span> ${item.name}</span>
+              <span style="font-weight:700; color:#fff;">₹${item.price * item.qty}</span>
             </div>
           `).join('')}
         </div>
       </div>
       
-      <div class="billing-section">
-        <div class="billing-row">
+      <div style="border-top:1px dashed var(--color-border); padding-top:16px; display:flex; flex-direction:column; gap:8px; font-size:14px; color:var(--color-text-muted);">
+        <div style="display:flex; justify-content:space-between;">
           <span>Subtotal</span>
           <span>₹${subtotal}</span>
         </div>
-        <div class="billing-row">
-          <span>Restaurant Packaging</span>
+        <div style="display:flex; justify-content:space-between;">
+          <span>Kitchen Packaging</span>
           <span>₹${packingFee}</span>
         </div>
-        <div class="billing-row">
-          <span>Delivery Partner Fee</span>
-          <span>${deliveryFee === 0 ? '<span style="color:var(--color-lime-pulse)">FREE</span>' : `₹${deliveryFee}`}</span>
+        <div style="display:flex; justify-content:space-between;">
+          <span>Courier Partner Fee</span>
+          <span>${deliveryFee === 0 ? '<span style="color:var(--color-lime)">FREE</span>' : `₹${deliveryFee}`}</span>
         </div>
-        <div class="billing-row">
-          <span>Taxes (5% GST)</span>
+        <div style="display:flex; justify-content:space-between;">
+          <span>GST (5%)</span>
           <span>₹${gst}</span>
         </div>
         ${discount > 0 ? `
-          <div class="billing-row billing-row--discount" style="color: green; font-weight: bold;">
-            <span>Coupon Discount (${appliedCouponCode})</span>
+          <div style="display:flex; justify-content:space-between; color:var(--color-lime); font-weight:700;">
+            <span>Coupon (${appliedCouponCode})</span>
             <span>- ₹${discount}</span>
           </div>
         ` : ''}
-        <div class="billing-row billing-row--total" style="font-weight: bold; font-size: var(--text-heading-sm); border-top: 2px solid #000; padding-top: var(--spacing-12); margin-top: var(--spacing-12);">
+        <div style="display:flex; justify-content:space-between; font-size:18px; font-weight:700; color:#fff; border-top:1px solid var(--color-border); padding-top:16px; margin-top:8px;">
           <span>Grand Total</span>
-          <span>₹${finalTotal}</span>
+          <span style="color:var(--color-lime);">₹${finalTotal}</span>
         </div>
       </div>
     `;
 
-    // Update bottom Pay button
     const payBtn = document.getElementById('checkout-pay-btn');
     if (payBtn) {
-      payBtn.innerHTML = `Confirm & Pay ₹${finalTotal}`;
+      payBtn.textContent = `Confirm & Pay ₹${finalTotal}`;
     }
   };
 
-  // Run render first time
   renderCheckoutSummary();
 
-  // Coupon Application Action
+  // Coupon apply bindings
   window.applyCoupon = function() {
     const input = document.getElementById('coupon-input');
     if (!input) return;
@@ -641,7 +702,6 @@ function initCheckoutPage() {
     }
   };
 
-  // Quick select coupon click
   window.selectQuickCoupon = function(code) {
     const input = document.getElementById('coupon-input');
     if (input) {
@@ -650,7 +710,7 @@ function initCheckoutPage() {
     }
   };
 
-  // Payment Method Selection Tabs
+  // Payment tab actions
   window.selectPaymentMethod = function(method) {
     const tabs = document.querySelectorAll('.payment-tab');
     const sections = document.querySelectorAll('.payment-section');
@@ -672,7 +732,7 @@ function initCheckoutPage() {
     });
   };
 
-  // Credit Card Live Mirror Input Listeners
+  // CC Input mirror listeners
   const cardNum = document.getElementById('cc-number');
   const cardName = document.getElementById('cc-name');
   const cardExpiry = document.getElementById('cc-expiry');
@@ -719,30 +779,42 @@ function initCheckoutPage() {
     });
   }
 
-  // Autofill Address Details for Demo
+  // Address Autofill action
   window.autofillDemoAddress = function() {
-    const nameInput = document.getElementById('address-name');
-    const phoneInput = document.getElementById('address-phone');
-    const areaInput = document.getElementById('address-area');
-    const pinInput = document.getElementById('address-pin');
-    const cityInput = document.getElementById('address-city');
+    const name = document.getElementById('address-name');
+    const phone = document.getElementById('address-phone');
+    const area = document.getElementById('address-area');
+    const pin = document.getElementById('address-pin');
+    const city = document.getElementById('address-city');
 
-    if (nameInput) nameInput.value = "Neha Verma";
-    if (phoneInput) phoneInput.value = "9876543210";
-    if (areaInput) areaInput.value = "456, Midtown Heights, Sector 4, Park Road";
-    if (pinInput) pinInput.value = "560001";
-    if (cityInput) cityInput.value = "My City";
+    if (name) name.value = "Neha Verma";
+    if (phone) phone.value = "9876543210";
+    if (area) area.value = "456, Midtown Heights, Sector 4, Park Road";
+    if (pin) pin.value = "560001";
+    if (city) city.value = "My City";
 
     showToast("📝 Autofilled demo delivery details!");
   };
 
-  // Handle Checkout Form Submission
+  // Handle Form submit with Clerk Check
   const checkoutForm = document.getElementById('checkout-main-form');
   if (checkoutForm) {
     checkoutForm.addEventListener('submit', (e) => {
       e.preventDefault();
 
-      // Mock submit validation
+      // Enforce auth gate
+      if (!verifyUserLogin()) {
+        showToast("🔒 Clerk Google login required before placing order");
+        if (window.Clerk) {
+          window.Clerk.openSignIn();
+        } else {
+          // Open mock login prompts if Clerk is not available
+          mockSignIn();
+        }
+        return;
+      }
+
+      // Address validations
       const name = document.getElementById('address-name').value;
       const phone = document.getElementById('address-phone').value;
       const area = document.getElementById('address-area').value;
@@ -752,20 +824,18 @@ function initCheckoutPage() {
         return;
       }
 
-      // Record first item's restaurant name to display on the tracker page
+      // Save order merchant for tracker
       const merchant = cart.items[0]?.restaurant || "Local Kitchens";
       localStorage.setItem("bb_last_order_merchant", merchant);
 
-      // Show secure BitesPay processing overlay
+      // Trigger overlay verification spinner
       const overlay = document.getElementById('processing-overlay');
       if (overlay) {
         overlay.style.display = 'flex';
       }
 
-      // Reset cart
       cart.clear();
 
-      // Redirect to tracker page after 2 seconds
       setTimeout(() => {
         window.location.href = "track.html";
       }, 2000);
@@ -774,15 +844,15 @@ function initCheckoutPage() {
 }
 
 // ============================================
-// 7. ORDER TRACKER TIMELINE SIMULATOR
+// 8. ORDER TIMELINE & ROAD MAP TRACKER (NEON STYLE)
 // ============================================
 function initTrackerPage() {
   const steps = [
-    { title: "Order Confirmed 🧾", desc: "Sent to the restaurant", time: 0 },
-    { title: "Kitchen Preparing Your Feast 🍳", desc: "Chef is frying that tasty meal", time: 4 },
-    { title: "Delivery Partner Dispatched 🛵", desc: "Ramesh K. is picking up your package", time: 8 },
-    { title: "Driver is Nearby 📍", desc: "Just 2 minutes away on the road", time: 12 },
-    { title: "Delivered! Enjoy your meal 🥳", desc: "Handed over safely with hot filter coffee", time: 16 }
+    { title: "Order Verified by Clerk 🔐", desc: "User session authenticated safely", time: 0 },
+    { title: "Confirmed by Merchant 🧾", desc: "Sent to chef cooking queue", time: 3 },
+    { title: "Preparing Fresh Meal 🍳", desc: "Quality taste guidelines active", time: 6 },
+    { title: "Rider Dispatched 🛵", desc: "Courier Ramesh K. on his TVS bike", time: 9 },
+    { title: "Arrived at Destination 📍", desc: "Confetti triggers live now!", time: 12 }
   ];
 
   const merchantName = localStorage.getItem("bb_last_order_merchant") || "MTR — Mavalli Tiffin Rooms";
@@ -797,98 +867,94 @@ function initTrackerPage() {
 
   if (!timeline) return;
 
-  // Render Timeline base
   timeline.innerHTML = steps.map((s, idx) => `
-    <div class="track-step" id="step-${idx}">
-      <div class="track-step__badge">
-        <span class="track-step__num">${idx + 1}</span>
+    <div class="timeline-step" id="step-${idx}">
+      <div class="timeline-step__badge">
+        <span>${idx + 1}</span>
       </div>
-      <div class="track-step__content">
-        <h4 class="track-step__title">${s.title}</h4>
-        <p class="track-step__desc">${s.desc}</p>
+      <div style="flex:1;">
+        <h4 class="timeline-step__title">${s.title}</h4>
+        <p class="timeline-step__desc">${s.desc}</p>
       </div>
     </div>
   `).join('');
 
-  // Active steps ticker
   let elapsed = 0;
   
   function updateProgress() {
     steps.forEach((step, idx) => {
       const stepEl = document.getElementById(`step-${idx}`);
       if (stepEl && elapsed >= step.time) {
-        stepEl.classList.add('track-step--active');
+        stepEl.classList.add('timeline-step--active');
         if (idx === steps.length - 1 && elapsed >= step.time) {
-          stepEl.classList.add('track-step--completed');
+          stepEl.classList.add('timeline-step--completed');
         }
       }
     });
 
-    // Move Courier Icon along mock track
-    const pct = Math.min(100, (elapsed / 16) * 100);
+    const pct = Math.min(100, (elapsed / 12) * 100);
     if (driverIcon) {
-      driverIcon.style.left = `calc(${pct}% - 24px)`;
+      driverIcon.style.left = `calc(${pct}% - 25px)`;
     }
     if (progressLine) {
       progressLine.style.width = `${pct}%`;
     }
 
-    // Status updates text
-    const statusText = document.getElementById('track-status-banner');
-    if (statusText) {
-      if (elapsed < 4) {
-        statusText.innerHTML = `Order accepted by <strong>${merchantName}</strong>.`;
-      } else if (elapsed < 8) {
-        statusText.innerHTML = `Dish being cooked fresh. Prep time 12 mins.`;
+    const statusBanner = document.getElementById('track-status-banner');
+    if (statusBanner) {
+      if (elapsed < 3) {
+        statusBanner.innerHTML = `Order authenticated. Waiting for kitchen confirmation...`;
+      } else if (elapsed < 6) {
+        statusBanner.innerHTML = `Order cooking fresh at <strong>${merchantName}</strong>.`;
+      } else if (elapsed < 9) {
+        statusBanner.innerHTML = `Courier Ramesh K. is picking up package...`;
       } else if (elapsed < 12) {
-        statusText.innerHTML = `Partner assigned: <strong>Ramesh K. (TVS Apache)</strong>.`;
-      } else if (elapsed < 16) {
-        statusText.innerHTML = `Ramesh is checking maps. Approaching your block.`;
+        statusBanner.innerHTML = `Ramesh K. is crossing the signal near you.`;
       } else {
-        statusText.innerHTML = `🏆 Order delivered! Enjoy the delicious flavors.`;
-        triggerConfetti();
+        statusBanner.innerHTML = `🏆 Delivered! Order dispatched successfully.`;
+        triggerConfettiCanvas();
       }
     }
 
-    if (elapsed < 16) {
+    if (elapsed < 12) {
       elapsed += 1;
       setTimeout(updateProgress, 1000);
     }
   }
 
-  // Kickstart progress loop
   updateProgress();
 }
 
-function triggerConfetti() {
-  const container = document.getElementById('confetti-wrapper');
+// Confetti fallback creation
+function triggerConfettiCanvas() {
+  const container = document.getElementById('confetti-canvas-overlay');
   if (!container || container.children.length > 0) return;
 
-  const colors = ['#a3e635', '#fbbf25', '#3366e0', '#f5d1fe', '#ff0000'];
-  for (let i = 0; i < 80; i++) {
-    const conf = document.createElement('div');
-    conf.style.position = 'absolute';
-    conf.style.width = `${Math.floor(Math.random() * 8) + 6}px`;
-    conf.style.height = `${Math.floor(Math.random() * 12) + 6}px`;
-    conf.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-    conf.style.left = `${Math.random() * 100}%`;
-    conf.style.top = `-20px`;
-    conf.style.borderRadius = '2px';
-    conf.style.transform = `rotate(${Math.random() * 360}deg)`;
-    conf.style.opacity = Math.random();
+  const colors = ['#a3e635', '#8b5cf6', '#f43f5e', '#3b82f6', '#ffffff'];
+  for (let i = 0; i < 90; i++) {
+    const dot = document.createElement('div');
+    dot.style.position = 'absolute';
+    dot.style.width = `${Math.floor(Math.random() * 8) + 6}px`;
+    dot.style.height = `${Math.floor(Math.random() * 10) + 6}px`;
+    dot.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+    dot.style.left = `${Math.random() * 100}%`;
+    dot.style.top = `-20px`;
+    dot.style.transform = `rotate(${Math.random() * 360}deg)`;
+    dot.style.borderRadius = '3px';
+    dot.style.opacity = Math.random();
     
-    const duration = Math.random() * 3 + 2;
-    conf.style.animation = `fallConfetti ${duration}s ease-in-out forwards`;
-    container.appendChild(conf);
+    const duration = Math.random() * 2 + 2;
+    dot.style.animation = `fallDot ${duration}s ease-in-out forwards`;
+    container.appendChild(dot);
   }
 
-  if (!document.getElementById('confetti-keyframes')) {
+  if (!document.getElementById('confetti-fall-keyframes')) {
     const style = document.createElement('style');
-    style.id = 'confetti-keyframes';
+    style.id = 'confetti-fall-keyframes';
     style.textContent = `
-      @keyframes fallConfetti {
+      @keyframes fallDot {
         0% { transform: translateY(0) rotate(0deg); opacity: 1; }
-        100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        100% { transform: translateY(105vh) rotate(540deg); opacity: 0; }
       }
     `;
     document.head.appendChild(style);
@@ -896,17 +962,26 @@ function triggerConfetti() {
 }
 
 // ============================================
-// 8. GENERAL BOOTSTRAPPING & ROUTING
+// 9. GENERAL INITS & ENTRY POINTS
 // ============================================
+window.addToCart = function(id, name, price, image, restaurant) {
+  cart.add({ id, name, price, image, restaurant });
+};
+
+window.openCart = openCart;
+window.closeCart = closeCart;
+
 document.addEventListener('DOMContentLoaded', () => {
-  // Load Cart first
+  // Load local storage cart state
   cart.load();
 
-  // Common setups
-  initScrollTop();
-  initSmoothScroll();
+  // Load Clerk auth
+  initClerkAuth();
 
-  // Dynamic route dispatcher
+  // General inits
+  initScrollTop();
+
+  // Route dispatcher
   const path = window.location.pathname.toLowerCase();
   
   if (path.includes('restaurant.html')) {
@@ -919,19 +994,9 @@ document.addEventListener('DOMContentLoaded', () => {
     initLandingPage();
   }
 
-  // Cart overlay dismiss
+  // Common bindings
   document.getElementById('cart-overlay')?.addEventListener('click', closeCart);
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') closeCart();
   });
 });
-
-// Add fadeIn animation
-const styleSheet = document.createElement('style');
-styleSheet.textContent = `
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-`;
-document.head.appendChild(styleSheet);
