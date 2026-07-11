@@ -1,5 +1,5 @@
 /* ============================================
-   🍽️ BengaluruBites — JavaScript (Core Logic)
+   🍽️ BiteSwift — JavaScript (Core Logic)
    Cart, Cuisines, Multi-page Routing & Simulators
    ============================================ */
 
@@ -148,7 +148,7 @@ const restaurantsData = {
   "koshys": {
     id: "koshys",
     name: "Koshy's",
-    cuisine: "Continental · Old Bangalore · Stews",
+    cuisine: "Continental · Classic · Stews",
     rating: "4.2",
     deliveryTime: "30–45 min",
     location: "St. Mark's Road",
@@ -172,7 +172,7 @@ const cart = {
 
   // Load cart from LocalStorage
   load() {
-    const saved = localStorage.getItem("bengalurubites_cart");
+    const saved = localStorage.getItem("biteswift_cart");
     if (saved) {
       try {
         this.items = JSON.parse(saved);
@@ -186,7 +186,7 @@ const cart = {
 
   // Save cart to LocalStorage
   save() {
-    localStorage.setItem("bengalurubites_cart", JSON.stringify(this.items));
+    localStorage.setItem("biteswift_cart", JSON.stringify(this.items));
   },
 
   add(dish) {
@@ -434,7 +434,7 @@ function initRestaurantPage() {
   }
 
   // Set page title
-  document.title = `${restaurant.name} Menu — BengaluruBites`;
+  document.title = `${restaurant.name} Menu — BiteSwift`;
 
   // Render Header Details
   const container = document.getElementById('restaurant-detail-header');
@@ -538,7 +538,7 @@ function initCheckoutPage() {
         <div class="checkout-empty" style="text-align:center; padding: 100px 24px;">
           <div style="font-size: 64px; margin-bottom: 24px;">🍱</div>
           <h2 class="text-heading-lg" style="margin-bottom: 16px;">Your basket is empty!</h2>
-          <p style="margin-bottom: 32px;">Go back to the homepage to order from Bengaluru's finest restaurants.</p>
+          <p style="margin-bottom: 32px;">Go back to the homepage to order from your city's finest restaurants.</p>
           <a href="index.html" class="btn-lime">Explore Restaurants</a>
         </div>
       `;
@@ -556,7 +556,7 @@ function initCheckoutPage() {
     const gst = Math.round(subtotal * 0.05); // 5% GST
     
     let discount = 0;
-    if (appliedCouponCode === "BENGALURU50") {
+    if (appliedCouponCode === "CRAVE50") {
       discount = Math.min(150, Math.round(subtotal * 0.5));
     } else if (appliedCouponCode === "FIRSTFEED") {
       discount = 200;
@@ -624,7 +624,7 @@ function initCheckoutPage() {
     if (!input) return;
     const code = input.value.toUpperCase().trim();
 
-    if (code === "BENGALURU50" || code === "FIRSTFEED") {
+    if (code === "CRAVE50" || code === "FIRSTFEED") {
       appliedCouponCode = code;
       showToast(`🎉 Coupon ${code} applied successfully!`);
       renderCheckoutSummary();
@@ -728,7 +728,7 @@ function initCheckoutPage() {
       }
 
       // Record first item's restaurant name to display on the tracker page
-      const merchant = cart.items[0]?.restaurant || "Bengaluru Kitchens";
+      const merchant = cart.items[0]?.restaurant || "Local Kitchens";
       localStorage.setItem("bb_last_order_merchant", merchant);
 
       // Reset cart

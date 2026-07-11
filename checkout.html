@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Secure checkout for BengaluruBites. Apply promo codes and select payment method.">
-  <title>Checkout — BengaluruBites</title>
+  <meta name="description" content="Secure checkout for BiteSwift. Apply promo codes and select payment method.">
+  <title>Checkout — BiteSwift</title>
   
   <!-- Satoshi Font -->
   <link href="https://api.fontshare.com/v2/css?f[]=satoshi@500,700&display=swap" rel="stylesheet">
@@ -28,7 +28,7 @@
         <circle cx="11" cy="11" r="1.2" fill="#000"/>
         <circle cx="17" cy="11" r="1.2" fill="#000"/>
       </svg>
-      BengaluruBites
+      BiteSwift
     </a>
 
     <div class="nav__links">
@@ -70,11 +70,11 @@
             </div>
             <div class="form-group">
               <label for="address-city" class="form-label">City</label>
-              <input type="text" id="address-city" class="input-field" value="Bengaluru" readonly>
+              <input type="text" id="address-city" class="input-field" value="My City" placeholder="City name" required>
             </div>
             <div class="form-group">
               <label for="address-pin" class="form-label">Pincode</label>
-              <input type="text" id="address-pin" class="input-field" placeholder="560xxx" pattern="[0-9]{6}" required>
+              <input type="text" id="address-pin" class="input-field" placeholder="123456" pattern="[0-9]{6}" required>
             </div>
           </div>
         </div>
@@ -179,8 +179,8 @@
             <button type="button" class="btn-lime btn-sm" onclick="applyCoupon()">Apply</button>
           </div>
           <div class="coupon-suggestions">
-            <div class="coupon-suggest-item" onclick="selectQuickCoupon('BENGALURU50')">
-              <div class="coupon-suggest-item__code">BENGALURU50</div>
+            <div class="coupon-suggest-item" onclick="selectQuickCoupon('CRAVE50')">
+              <div class="coupon-suggest-item__code">CRAVE50</div>
               <div class="coupon-suggest-item__desc">Get 50% Off up to ₹150</div>
             </div>
             <div class="coupon-suggest-item" onclick="selectQuickCoupon('FIRSTFEED')">
